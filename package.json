@@ -7,6 +7,7 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "local": "wrangler dev --local",
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
@@ -14,7 +15,10 @@
   },
   "dependencies": {
     "@astrojs/cloudflare": "^13.1.9",
-    "astro": "^6.1.6"
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.103.2",
+    "astro": "^6.1.6",
+    "zod": "^4.3.6"
   },
   "overrides": {
     "vite": "^7"

@@ -70,24 +70,24 @@ El proyecto debe quedar documentado, versionado y con entorno local funcional.
 ## Fase 2 - Base de datos y reglas de acceso
 
 ### 2.1 Migración inicial
-- [ ] Crear migración `init_schema`
-- [ ] Crear tabla `admin_users`
-- [ ] Crear tabla `posts`
-- [ ] Agregar restricciones para `status`
-- [ ] Agregar restricciones para `post_type`
-- [ ] Agregar restricción de `slug` único
+- [x] Crear migración `init_schema`
+- [x] Crear tabla `admin_users`
+- [x] Crear tabla `posts`
+- [x] Agregar restricciones para `status`
+- [x] Agregar restricciones para `post_type`
+- [x] Agregar restricción de `slug` único
 
 ### 2.2 Seguridad y autorización
-- [ ] Habilitar RLS en tablas necesarias
-- [ ] Crear policy para lectura pública de posts `published`
-- [ ] Crear policy para gestión de posts por admin autenticado
-- [ ] Validar relación entre `auth.users` y `admin_users`
+- [x] Habilitar RLS en tablas necesarias
+- [x] Crear policy para lectura pública de posts `published`
+- [x] Crear policy para gestión de posts por admin autenticado
+- [x] Validar relación entre `auth.users` y `admin_users`
 
 ### 2.3 Seed y validación local
-- [ ] Crear `seed.sql`
-- [ ] Agregar datos mínimos de prueba
-- [ ] Ejecutar `supabase db reset`
-- [ ] Validar tablas y datos en Studio local
+- [x] Crear `seed.sql`
+- [x] Agregar datos mínimos de prueba
+- [x] Ejecutar `supabase db reset`
+- [x] Validar tablas y datos en Studio local
 
 ### Resultado esperado de la fase
 La base de datos local debe quedar operativa, con restricciones, seguridad y datos mínimos de prueba.
@@ -97,15 +97,17 @@ La base de datos local debe quedar operativa, con restricciones, seguridad y dat
 ## Fase 3 - Integración Astro + Supabase
 
 ### 3.1 Conexión base
-- [ ] Crear cliente de Supabase para frontend
-- [ ] Crear cliente de Supabase para servidor
-- [ ] Definir manejo de variables de entorno
-- [ ] Confirmar conexión entre Astro y Supabase local
+- [x] Crear cliente de Supabase para frontend
+- [x] Crear cliente de Supabase para servidor
+- [x] Definir manejo de variables de entorno
+- [x] Confirmar conexión entre Astro y Supabase local
 
 ### 3.2 Tipado y utilidades
-- [ ] Crear tipos base para `posts`
-- [ ] Crear utilidades para generación de `slug`
-- [ ] Crear validaciones base para formularios de publicación
+- [x] Crear tipos base para `posts`
+- [x] Crear utilidades para generación de `slug`
+- [x] Instalar Zod para validaciones base
+- [x] Crear esquema base de validación para publicaciones
+- [x] Crear validaciones base para formularios de publicación
 
 ### Resultado esperado de la fase
 La aplicación debe poder consultar e interactuar con la base local desde Astro.
