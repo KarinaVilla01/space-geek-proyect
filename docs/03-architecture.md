@@ -18,6 +18,7 @@ La arquitectura debe cumplir con los siguientes objetivos:
 ## 3. Stack principal
 - **Frontend / Web app:** Astro
 - **Lenguaje principal:** TypeScript
+- Validación de formularios: Zod
 - **Autenticación:** Supabase Auth
 - **Base de datos:** Supabase Postgres
 - **Almacenamiento de imágenes:** Supabase Storage

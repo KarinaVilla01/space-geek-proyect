@@ -1,0 +1,55 @@
+---
+import { createSupabaseServerClient } from '../../lib/supabase/server'
+
+const supabase = createSupabaseServerClient()
+
+const { data: posts, error } = await supabase
+  .from('posts')
+  .select('id, title, slug, excerpt, post_type, published_at')
+  .eq('status', 'published')
+  .order('published_at', { ascending: false })
+---
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Posts</title>
+  </head>
+  <body>
+    <main>
+      <h1>Posts</h1>
+
+      {error && (
+        <section>
+          <h2>Error loading posts</h2>
+          <pre>{error.message}</pre>
+        </section>
+      )}
+
+      {!error && (!posts || posts.length === 0) && (
+        <section>
+          <p>No published posts found.</p>
+        </section>
+      )}
+
+      {!error && posts && posts.length > 0 && (
+        <ul>
+          {posts.map((post) => (
+            <li>
+              <article>
+                <h2>{post.title}</h2>
+                <p><strong>Type:</strong> {post.post_type}</p>
+                <p><strong>Slug:</strong> {post.slug}</p>
+                {post.published_at && (
+                  <p><strong>Published:</strong> {new Date(post.published_at).toLocaleString()}</p>
+                )}
+                {post.excerpt && <p>{post.excerpt}</p>}
+              </article>
+            </li>
+          ))}
+        </ul>
+      )}
+    </main>
+  </body>
+</html>
