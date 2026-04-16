@@ -57,6 +57,13 @@ if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
       <h1>Admin Dashboard</h1>
       <p>Bienvenida, {user.email}</p>
 
+      <nav>
+        <ul>
+          <li><a href="/admin/posts">Ver publicaciones</a></li>
+          <li><a href="/admin/posts/new">Nueva publicación</a></li>
+        </ul>
+      </nav>
+
       <form action="/api/auth/logout" method="get">
         <button type="submit">Logout</button>
       </form>
