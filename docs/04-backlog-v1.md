@@ -117,20 +117,20 @@ La aplicación debe poder consultar e interactuar con la base local desde Astro.
 ## Fase 4 - Autenticación del administrador
 
 ### 4.1 Flujo de login
-- [ ] Crear ruta `/admin/login`
-- [ ] Implementar formulario de login
-- [ ] Integrar autenticación con Supabase Auth
-- [ ] Validar acceso con cuenta administrativa
+- [x] Crear ruta `/admin/login`
+- [x] Implementar formulario de login
+- [x] Integrar autenticación con Supabase Auth
+- [x] Validar acceso con cuenta administrativa
 
 ### 4.2 Protección de rutas
-- [ ] Proteger rutas bajo `/admin`
-- [ ] Redirigir usuarios no autenticados fuera del panel
-- [ ] Confirmar que visitantes no puedan acceder al panel privado
+- [x] Proteger rutas bajo `/admin`
+- [x] Redirigir usuarios no autenticados fuera del panel
+- [x] Confirmar que visitantes no puedan acceder al panel privado
 
 ### 4.3 Gestión básica de sesión
-- [ ] Confirmar persistencia de sesión
-- [ ] Implementar logout
-- [ ] Validar comportamiento al expirar sesión
+- [x] Confirmar persistencia de sesión
+- [x] Implementar logout
+- [x] Validar comportamiento al expirar sesión
 
 ### Resultado esperado de la fase
 Solo el administrador debe poder entrar al panel privado mediante login válido.

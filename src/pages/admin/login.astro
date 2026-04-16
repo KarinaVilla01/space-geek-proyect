@@ -1,0 +1,36 @@
+---
+export const prerender = false
+
+const accessToken = Astro.cookies.get('sb-access-token')
+const refreshToken = Astro.cookies.get('sb-refresh-token')
+
+if (accessToken && refreshToken) {
+  return Astro.redirect('/admin')
+}
+
+const error = Astro.url.searchParams.get('error')
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Login</title>
+  </head>
+  <body>
+    <main>
+      <h1>Admin Login</h1>
+      {error && <p>{error}</p>}
+
+      <form method="POST" action="/api/auth/login">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required />
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required />
+
+        <button type="submit">Sign in</button>
+      </form>
+    </main>
+  </body>
+</html>
