@@ -1,0 +1,113 @@
+---
+export const prerender = false
+
+import { createSupabaseClient } from '../../../lib/supabase'
+
+const supabase = createSupabaseClient()
+
+const accessToken = Astro.cookies.get('sb-access-token')
+const refreshToken = Astro.cookies.get('sb-refresh-token')
+
+if (!accessToken || !refreshToken) {
+  return Astro.redirect('/admin/login')
+}
+
+let sessionResult
+
+try {
+  sessionResult = await supabase.auth.setSession({
+    access_token: accessToken.value,
+    refresh_token: refreshToken.value,
+  })
+
+  if (sessionResult.error || !sessionResult.data.user) {
+    Astro.cookies.delete('sb-access-token', { path: '/' })
+    Astro.cookies.delete('sb-refresh-token', { path: '/' })
+    return Astro.redirect('/admin/login')
+  }
+} catch {
+  Astro.cookies.delete('sb-access-token', { path: '/' })
+  Astro.cookies.delete('sb-refresh-token', { path: '/' })
+  return Astro.redirect('/admin/login')
+}
+
+const user = sessionResult.data.user
+
+const { data: adminUser } = await supabase
+  .from('admin_users')
+  .select('id, role, is_active')
+  .eq('id', user.id)
+  .maybeSingle()
+
+if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
+  Astro.cookies.delete('sb-access-token', { path: '/' })
+  Astro.cookies.delete('sb-refresh-token', { path: '/' })
+  return Astro.redirect('/admin/login?error=Not%20authorized')
+}
+
+const { data: posts, error } = await supabase
+  .from('posts')
+  .select('id, title, slug, status, post_type, created_at, published_at')
+  .order('created_at', { ascending: false })
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Posts</title>
+  </head>
+  <body>
+    <main>
+      <h1>Publicaciones</h1>
+
+      <nav>
+        <a href="/admin">Volver al panel</a>
+        {' | '}
+        <a href="/admin/posts/new">Nueva publicación</a>
+      </nav>
+
+      {error && (
+        <section>
+          <h2>Error</h2>
+          <pre>{error.message}</pre>
+        </section>
+      )}
+
+      {!error && (!posts || posts.length === 0) && (
+        <p>No hay publicaciones registradas.</p>
+      )}
+
+      {!error && posts && posts.length > 0 && (
+        <table border="1" cellpadding="8" cellspacing="0">
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Status</th>
+              <th>Tipo</th>
+              <th>Slug</th>
+              <th>Creado</th>
+              <th>Publicado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {posts.map((post) => (
+              <tr>
+                <td>{post.title}</td>
+                <td>{post.status}</td>
+                <td>{post.post_type}</td>
+                <td>{post.slug}</td>
+                <td>{new Date(post.created_at).toLocaleString()}</td>
+                <td>{post.published_at ? new Date(post.published_at).toLocaleString() : '-'}</td>
+                <td>
+                  <a href={`/admin/posts/${post.id}/edit`}>Editar</a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </main>
+  </body>
+</html>

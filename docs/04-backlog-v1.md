@@ -140,16 +140,16 @@ Solo el administrador debe poder entrar al panel privado mediante login válido.
 ## Fase 5 - Panel administrativo base
 
 ### 5.1 Dashboard inicial
-- [ ] Crear ruta `/admin`
-- [ ] Mostrar navegación básica del panel
-- [ ] Crear acceso a listado de publicaciones
-- [ ] Crear acceso a nueva publicación
+- [x] Crear ruta `/admin`
+- [x] Mostrar navegación básica del panel
+- [x] Crear acceso a listado de publicaciones
+- [x] Crear acceso a nueva publicación
 
 ### 5.2 Listado administrativo de publicaciones
-- [ ] Crear ruta `/admin/posts`
-- [ ] Mostrar publicaciones existentes
-- [ ] Mostrar `title`, `status`, `post_type`, `created_at`
-- [ ] Agregar acceso a edición por publicación
+- [x] Crear ruta `/admin/posts`
+- [x] Mostrar publicaciones existentes
+- [x] Mostrar `title`, `status`, `post_type`, `created_at`
+- [x] Agregar acceso a edición por publicación
 
 ### Resultado esperado de la fase
 El administrador debe poder entrar al panel y visualizar la lista de publicaciones.
