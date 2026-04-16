@@ -159,20 +159,20 @@ El administrador debe poder entrar al panel y visualizar la lista de publicacion
 ## Fase 6 - Crear publicaciones
 
 ### 6.1 Formulario de creación
-- [ ] Crear ruta `/admin/posts/new`
-- [ ] Implementar formulario para nuevo post
-- [ ] Capturar `title`
-- [ ] Capturar `slug`
-- [ ] Capturar `excerpt`
-- [ ] Capturar `content_md`
-- [ ] Capturar `post_type`
-- [ ] Capturar `status`
+- [x] Crear ruta `/admin/posts/new`
+- [x] Implementar formulario para nuevo post
+- [x] Capturar `title`
+- [x] Capturar `slug`
+- [x] Capturar `excerpt`
+- [x] Capturar `content_md`
+- [x] Capturar `post_type`
+- [x] Capturar `status`
 
 ### 6.2 Guardado en base de datos
-- [ ] Guardar nuevo post como `draft`
-- [ ] Validar campos requeridos
-- [ ] Validar unicidad de `slug`
-- [ ] Confirmar guardado correcto en base de datos
+- [x] Guardar nuevo post como `draft`
+- [x] Validar campos requeridos
+- [x] Validar unicidad de `slug`
+- [x] Confirmar guardado correcto en base de datos
 
 ### Resultado esperado de la fase
 El administrador debe poder crear publicaciones nuevas y guardarlas como borrador.

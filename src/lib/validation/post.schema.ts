@@ -8,7 +8,7 @@ export const postFormSchema = z
     title: z.string().trim().min(1, 'Title is required').max(200, 'Title is too long'),
     slug: z.string().trim().min(1, 'Slug is required').max(220, 'Slug is too long'),
     excerpt: z.string().trim().max(300, 'Excerpt is too long').optional().or(z.literal('')),
-    content_md: z.string().trim().optional().default(''),
+    content_md: z.string().trim().min(1, 'Content is required'),
     cover_image_url: z.string().trim().optional().or(z.literal('')),
     status: postStatusSchema,
     post_type: postTypeSchema,
