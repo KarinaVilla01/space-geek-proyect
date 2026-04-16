@@ -8,16 +8,16 @@ export const postFormSchema = z
     title: z.string().trim().min(1, 'Title is required').max(200, 'Title is too long'),
     slug: z.string().trim().min(1, 'Slug is required').max(220, 'Slug is too long'),
     excerpt: z.string().trim().max(300, 'Excerpt is too long').optional().or(z.literal('')),
-    content_md: z.string().trim().min(1, 'Content is required'),
-    cover_image_url: z.string().trim().optional().or(z.literal('')),
+    content_html: z.string().trim().min(1, 'Content is required'),
+    cover_image_path: z.string().trim().optional().or(z.literal('')),
     status: postStatusSchema,
     post_type: postTypeSchema,
   })
   .superRefine((data, ctx) => {
-    if (data.status === 'published' && data.content_md.trim().length === 0) {
+    if (data.status === 'published' && data.content_html.trim().length === 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ['content_md'],
+        path: ['content_html'],
         message: 'Content is required to publish a post',
       })
     }

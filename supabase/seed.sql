@@ -3,7 +3,8 @@ insert into public.posts (
   title,
   slug,
   excerpt,
-  content_md,
+  content_html,
+  cover_image_path,
   status,
   post_type,
   published_at

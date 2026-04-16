@@ -1,0 +1,188 @@
+---
+import PublicLayout from "../layouts/PublicLayout.astro";
+import { createSupabaseClient } from "../lib/supabase";
+import "../styles/global.css";
+
+const supabase = createSupabaseClient();
+
+const { data: recentPosts, error } = await supabase
+  .from("posts")
+  .select("id, title, slug, excerpt, cover_image_path, post_type, published_at")
+  .eq("status", "published")
+  .order("published_at", { ascending: false })
+  .limit(6);
+---
+
+<PublicLayout title="SpaceGeek | Blog">
+  <div class="dashboard home-page">
+    <section class="hero hero--home">
+      <div class="hero__imgs">
+        <div class="img-primary">
+          <img src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img1.png" alt="" />
+        </div>
+        <div class="img-secondary">
+          <div class="imgSection">
+            <img src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img2.png" alt="" />
+            <img src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img3.png" alt="" />
+          </div>
+          <div class="imgSection">
+            <img src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img4.png" alt="" />
+            <img src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img5.png" alt="" />
+          </div>
+        </div>
+      </div>
+      <div class="hero__summary">
+        <div class="summary-card">
+          <span>Últimas publicaciones</span>
+          <strong>{recentPosts?.length ?? 0}</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="home-grid">
+      <div class="home-main">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Últimas novedades</p>
+            <h2>Historias destacadas</h2>
+          </div>
+          <a class="secondary-button" href="/posts">Ver más artículos</a>
+        </div>
+
+        {
+          !error && (!recentPosts || recentPosts.length === 0) && (
+            <div class="note">No hay publicaciones publicadas todavía.</div>
+          )
+        }
+
+        {
+          error && (
+            <div class="notification notification--error">
+              <strong>Error:</strong> {error.message}
+            </div>
+          )
+        }
+
+        {
+          !error && recentPosts && recentPosts.length > 0 && (
+            <div class="post-list">
+              {recentPosts.map((post) => (
+                <article class="post-card">
+                  {post.cover_image_path && (
+                    <img
+                      class="post-card__image"
+                      src={
+                        supabase.storage
+                          .from("post-images")
+                          .getPublicUrl(post.cover_image_path).data.publicUrl
+                      }
+                      alt={post.title}
+                    />
+                  )}
+                  <div class="post-card__content">
+                    <div class="post-card__meta">
+                      <span class="tag-pill">{post.post_type}</span>
+                      <span>
+                        {new Date(post.published_at).toLocaleDateString(
+                          "es-ES",
+                          { year: "numeric", month: "short", day: "numeric" },
+                        )}
+                      </span>
+                    </div>
+                    <h3 class="post-card__title">
+                      <a href={`/posts/${post.slug}`}>{post.title}</a>
+                    </h3>
+                    {post.excerpt && (
+                      <p class="post-card__excerpt">{post.excerpt}</p>
+                    )}
+                    <a class="table-link" href={`/posts/${post.slug}`}>
+                      Leer publicación
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )
+        }
+      </div>
+
+      <aside class="home-sidebar">
+        <div class="sidebar-card">
+          <h3>Destacados</h3>
+          <p>
+            Explora las secciones más populares y mantente al tanto de los temas
+            que la comunidad está leyendo.
+          </p>
+          <ul class="sidebar-list">
+            <li>Anime & cultura pop</li>
+            <li>Tecnología y gadgets</li>
+            <li>Gaming y eSports</li>
+            <li>Reseñas y opinión</li>
+          </ul>
+        </div>
+
+        <div class="sidebar-card">
+          <h3>Últimos artículos</h3>
+          <div class="sidebar-list">
+            {
+              recentPosts?.slice(0, 4).map((post) => (
+                <a class="sidebar-link" href={`/posts/${post.slug}`}>
+                  <strong>{post.title}</strong>
+                  <span>
+                    {new Date(post.published_at).toLocaleDateString("es-ES", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </span>
+                </a>
+              ))
+            }
+          </div>
+        </div>
+
+        <div class="sidebar-card sidebar-card--cta">
+          <h3>Sigue al autor</h3>
+          <p>Mantente conectado en nuestras redes sociales.</p>
+          <div class="social-links">
+            <a
+              href="https://twitter.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link"
+              title="Twitter"
+            >
+              𝕏
+            </a>
+            <a
+              href="https://youtube.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link"
+              title="YouTube"
+            >
+              ▶
+            </a>
+            <a
+              href="https://instagram.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link"
+              title="Instagram"
+            >
+              📷
+            </a>
+            <a
+              href="https://discord.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="social-link"
+              title="Discord"
+            >
+              💬
+            </a>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </div>
+</PublicLayout>

@@ -1,0 +1,246 @@
+---
+export interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-container">
+        <div class="header-logo">
+          <a href="/" class="logo-link">
+            <img src="/Cover.png" alt="SpaceGeek" class="header-image" />
+          </a>
+        </div>
+        <nav class="header-nav">
+          <a href="/" class="nav-link">Inicio</a>
+          <a href="/posts" class="nav-link">Publicaciones</a>
+          <a href="/about" class="nav-link">Acerca de</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <h3>SpaceGeek</h3>
+            <p>Noticias, artículos y análisis para fans de la cultura geek.</p>
+          </div>
+          <div class="footer-section">
+            <h4>Enlaces</h4>
+            <ul class="footer-links">
+              <li><a href="/">Inicio</a></li>
+              <li><a href="/posts">Publicaciones</a></li>
+              <li><a href="/about">Acerca de</a></li>
+            </ul>
+          </div>
+          <div class="footer-section">
+            <h4>Conectar</h4>
+            <div class="social-links">
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" title="Twitter">𝕏</a>
+              <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" title="YouTube">▶</a>
+              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" title="Instagram">📷</a>
+              <a href="https://discord.com" target="_blank" rel="noopener noreferrer" title="Discord">💬</a>
+            </div>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>&copy; 2024 SpaceGeek. Todos los derechos reservados.</p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .site-header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(30, 82, 223, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .header-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 80px;
+  }
+
+  .header-logo {
+    flex-shrink: 0;
+  }
+
+  .logo-link {
+    display: block;
+    text-decoration: none;
+  }
+
+  .header-image {
+    height: 50px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  .header-nav {
+    display: flex;
+    gap: 2rem;
+  }
+
+  .nav-link {
+    color: #0f172a;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+  }
+
+  .nav-link:hover {
+    background: rgba(56, 189, 248, 0.1);
+    color: #0f172a;
+  }
+
+  .main-content {
+    min-height: calc(100vh - 160px);
+  }
+
+  .site-footer {
+    background: rgba(15, 23, 42, 0.95);
+    color: #e2e8f0;
+    margin-top: 4rem;
+  }
+
+  .footer-container {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 3rem 2rem 1rem;
+  }
+
+  .footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .footer-section h3 {
+    color: #f8fafc;
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+  }
+
+  .footer-section h4 {
+    color: #cbd5e1;
+    margin: 0 0 1rem;
+    font-size: 1.1rem;
+  }
+
+  .footer-section p {
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .footer-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .footer-links li {
+    margin-bottom: 0.5rem;
+  }
+
+  .footer-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .footer-links a:hover {
+    color: #38bdf8;
+  }
+
+  .social-links {
+    display: flex;
+    gap: 1rem;
+  }
+
+  .social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(56, 189, 248, 0.1);
+    color: #38bdf8;
+    text-decoration: none;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+  }
+
+  .social-links a:hover {
+    background: rgba(56, 189, 248, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .footer-bottom {
+    border-top: 1px solid rgba(56, 189, 248, 0.1);
+    padding-top: 1rem;
+    text-align: center;
+  }
+
+  .footer-bottom p {
+    color: #64748b;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  @media (max-width: 768px) {
+    .header-container {
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem;
+      min-height: 60px;
+    }
+
+    .header-nav {
+      gap: 1rem;
+    }
+
+    .nav-link {
+      padding: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .footer-content {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .social-links {
+      justify-content: center;
+    }
+  }
+</style>

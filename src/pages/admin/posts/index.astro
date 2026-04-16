@@ -2,6 +2,7 @@
 export const prerender = false
 
 import { createSupabaseClient } from '../../../lib/supabase'
+import '../../../styles/global.css'
 
 const supabase = createSupabaseClient()
 
@@ -59,55 +60,68 @@ const { data: posts, error } = await supabase
   </head>
   <body>
     <main>
-      <h1>Publicaciones</h1>
-
-      <nav>
-        <a href="/admin">Volver al panel</a>
-        {' | '}
-        <a href="/admin/posts/new">Nueva publicación</a>
-      </nav>
-
-      {error && (
-        <section>
-          <h2>Error</h2>
-          <pre>{error.message}</pre>
+      <div class="dashboard">
+        <section class="hero">
+          <div class="hero__header">
+            <div class="hero__text">
+              <p class="eyebrow">Publicaciones</p>
+              <h1>Administra tu contenido</h1>
+              <p>Revisa el estado de los posts, edita entradas existentes y crea nuevas publicaciones desde tu panel.</p>
+            </div>
+            <div class="actions actions--row">
+              <a class="secondary-button" href="/admin">Volver al panel</a>
+              <a class="secondary-button" href="/admin/posts/new">Nueva publicación</a>
+            </div>
+          </div>
         </section>
-      )}
 
-      {!error && (!posts || posts.length === 0) && (
-        <p>No hay publicaciones registradas.</p>
-      )}
+        <section class="content-card">
 
-      {!error && posts && posts.length > 0 && (
-        <table border="1" cellpadding="8" cellspacing="0">
-          <thead>
-            <tr>
-              <th>Título</th>
-              <th>Status</th>
-              <th>Tipo</th>
-              <th>Slug</th>
-              <th>Creado</th>
-              <th>Publicado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.map((post) => (
-              <tr>
-                <td>{post.title}</td>
-                <td>{post.status}</td>
-                <td>{post.post_type}</td>
-                <td>{post.slug}</td>
-                <td>{new Date(post.created_at).toLocaleString()}</td>
-                <td>{post.published_at ? new Date(post.published_at).toLocaleString() : '-'}</td>
-                <td>
-                  <a href={`/admin/posts/${post.id}/edit`}>Editar</a>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+          {error && (
+            <div class="notification notification--error">
+              <strong>Error:</strong>
+              <pre>{error.message}</pre>
+            </div>
+          )}
+
+          {!error && (!posts || posts.length === 0) && (
+            <div class="notification notification--info">No hay publicaciones registradas.</div>
+          )}
+
+          {!error && posts && posts.length > 0 && (
+            <div class="table-wrapper">
+              <table class="posts-table">
+                <thead>
+                  <tr>
+                    <th>Título</th>
+                    <th>Estado</th>
+                    <th>Tipo</th>
+                    <th>Slug</th>
+                    <th>Creado</th>
+                    <th>Publicado</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {posts.map((post) => (
+                    <tr>
+                      <td>{post.title}</td>
+                      <td>{post.status}</td>
+                      <td>{post.post_type}</td>
+                      <td>{post.slug}</td>
+                      <td>{new Date(post.created_at).toLocaleString()}</td>
+                      <td>{post.published_at ? new Date(post.published_at).toLocaleString() : '-'}</td>
+                      <td>
+                        <a class="table-link" href={`/admin/posts/${post.id}/edit`}>Editar</a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
     </main>
   </body>
 </html>

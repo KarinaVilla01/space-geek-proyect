@@ -1,61 +1,63 @@
 ---
-export const prerender = false
+export const prerender = false;
 
-import { createSupabaseClient } from '../../../lib/supabase'
-import { ensureUniqueSlugBase } from '../../../lib/utils/slug'
+import { createSupabaseClient } from "../../../lib/supabase";
+import { ensureUniqueSlugBase } from "../../../lib/utils/slug";
+import "../../../styles/global.css";
 
-const supabase = createSupabaseClient()
+const supabase = createSupabaseClient();
 
-const accessToken = Astro.cookies.get('sb-access-token')
-const refreshToken = Astro.cookies.get('sb-refresh-token')
+const accessToken = Astro.cookies.get("sb-access-token");
+const refreshToken = Astro.cookies.get("sb-refresh-token");
 
 if (!accessToken || !refreshToken) {
-  return Astro.redirect('/admin/login')
+  return Astro.redirect("/admin/login");
 }
 
-let sessionResult
+let sessionResult;
 
 try {
   sessionResult = await supabase.auth.setSession({
     access_token: accessToken.value,
     refresh_token: refreshToken.value,
-  })
+  });
 
   if (sessionResult.error || !sessionResult.data.user) {
-    Astro.cookies.delete('sb-access-token', { path: '/' })
-    Astro.cookies.delete('sb-refresh-token', { path: '/' })
-    return Astro.redirect('/admin/login')
+    Astro.cookies.delete("sb-access-token", { path: "/" });
+    Astro.cookies.delete("sb-refresh-token", { path: "/" });
+    return Astro.redirect("/admin/login");
   }
 } catch {
-  Astro.cookies.delete('sb-access-token', { path: '/' })
-  Astro.cookies.delete('sb-refresh-token', { path: '/' })
-  return Astro.redirect('/admin/login')
+  Astro.cookies.delete("sb-access-token", { path: "/" });
+  Astro.cookies.delete("sb-refresh-token", { path: "/" });
+  return Astro.redirect("/admin/login");
 }
 
-const user = sessionResult.data.user
+const user = sessionResult.data.user;
 
 const { data: adminUser } = await supabase
-  .from('admin_users')
-  .select('id, role, is_active')
-  .eq('id', user.id)
-  .maybeSingle()
+  .from("admin_users")
+  .select("id, role, is_active")
+  .eq("id", user.id)
+  .maybeSingle();
 
-if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
-  Astro.cookies.delete('sb-access-token', { path: '/' })
-  Astro.cookies.delete('sb-refresh-token', { path: '/' })
-  return Astro.redirect('/admin/login?error=Not%20authorized')
+if (!adminUser || adminUser.role !== "admin" || adminUser.is_active !== true) {
+  Astro.cookies.delete("sb-access-token", { path: "/" });
+  Astro.cookies.delete("sb-refresh-token", { path: "/" });
+  return Astro.redirect("/admin/login?error=Not%20authorized");
 }
 
-const error = Astro.url.searchParams.get('error')
-const success = Astro.url.searchParams.get('success')
-const title = Astro.url.searchParams.get('title') ?? ''
-const slug = Astro.url.searchParams.get('slug') ?? ''
-const excerpt = Astro.url.searchParams.get('excerpt') ?? ''
-const content_md = Astro.url.searchParams.get('content_md') ?? ''
-const post_type = Astro.url.searchParams.get('post_type') ?? 'blog'
-const status = Astro.url.searchParams.get('status') ?? 'draft'
+const error = Astro.url.searchParams.get("error");
+const success = Astro.url.searchParams.get("success");
+const title = Astro.url.searchParams.get("title") ?? "";
+const slug = Astro.url.searchParams.get("slug") ?? "";
+const excerpt = Astro.url.searchParams.get("excerpt") ?? "";
+const content_html = Astro.url.searchParams.get("content_html") ?? "";
+const post_type = Astro.url.searchParams.get("post_type") ?? "blog";
+const status = Astro.url.searchParams.get("status") ?? "draft";
 
-const suggestedSlug = title ? ensureUniqueSlugBase(title) : ''
+const suggestedSlug = title ? ensureUniqueSlugBase(title) : "";
+const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
 ---
 
 <html lang="es">
@@ -63,62 +65,171 @@ const suggestedSlug = title ? ensureUniqueSlugBase(title) : ''
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nueva publicación</title>
+    <script
+      src={`https://cdn.tiny.cloud/1/${tinyApiKey}/tinymce/8/tinymce.min.js`}
+      referrerpolicy="origin"></script>
   </head>
   <body>
     <main>
-      <h1>Nueva publicación</h1>
+      <div class="dashboard">
+        <section class="hero">
+          <div class="hero__header">
+            <div class="hero__text">
+              <p class="eyebrow">Nueva publicación</p>
+              <h1>Crea contenido nuevo</h1>
+              <p>
+                Escribe un artículo, sube una imagen destacada y publícalo
+                cuando esté listo.
+              </p>
+            </div>
+            <div class="actions actions--row">
+              <a class="secondary-button" href="/admin">Volver al panel</a>
+              <a class="secondary-button" href="/admin/posts"
+                >Ver publicaciones</a
+              >
+            </div>
+          </div>
+        </section>
 
-      <nav>
-        <a href="/admin">Volver al panel</a>
-        {' | '}
-        <a href="/admin/posts">Ver publicaciones</a>
-      </nav>
+        <section class="content-card">
+          {
+            error && (
+              <div class="notification notification--error">
+                <strong>Error:</strong> {error}
+              </div>
+            )
+          }
+          {
+            success && (
+              <div class="notification notification--success">
+                <strong>{success}</strong>
+              </div>
+            )
+          }
 
-      {error && <p><strong>Error:</strong> {error}</p>}
-      {success && <p><strong>{success}</strong></p>}
+          <form
+            method="POST"
+            action="/api/admin/posts/create"
+            id="post-form"
+            enctype="multipart/form-data"
+            class="post-form"
+          >
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="title">Título</label>
+                <input
+                  id="title"
+                  name="title"
+                  type="text"
+                  value={title}
+                  required
+                  class="form-input"
+                />
+              </div>
 
-      <form method="POST" action="/api/admin/posts/create">
-        <div>
-          <label for="title">Título</label><br />
-          <input id="title" name="title" type="text" value={title} required />
-        </div>
+              <div class="form-group">
+                <label for="slug">Slug</label>
+                <input
+                  id="slug"
+                  name="slug"
+                  type="text"
+                  value={slug || suggestedSlug}
+                  required
+                  class="form-input"
+                />
+              </div>
 
-        <div>
-          <label for="slug">Slug</label><br />
-          <input id="slug" name="slug" type="text" value={slug || suggestedSlug} required />
-        </div>
+              <div class="form-group form-group--full">
+                <label for="excerpt">Extracto</label>
+                <textarea
+                  id="excerpt"
+                  name="excerpt"
+                  rows="3"
+                  class="form-textarea">{excerpt}</textarea
+                >
+              </div>
 
-        <div>
-          <label for="excerpt">Extracto</label><br />
-          <textarea id="excerpt" name="excerpt" rows="3">{excerpt}</textarea>
-        </div>
+              <div class="form-group form-group--full">
+                <label for="content_html">Contenido</label>
+                <textarea
+                  id="content_html"
+                  name="content_html"
+                  class="form-textarea form-textarea--editor"
+                  >{content_html}</textarea
+                >
+              </div>
 
-        <div>
-          <label for="content_md">Contenido</label><br />
-          <textarea id="content_md" name="content_md" rows="10" required>{content_md}</textarea>
-        </div>
+              <div class="form-group">
+                <label for="post_type">Tipo</label>
+                <select id="post_type" name="post_type" class="form-select">
+                  <option value="blog" selected={post_type === "blog"}
+                    >blog</option
+                  >
+                  <option value="news" selected={post_type === "news"}
+                    >news</option
+                  >
+                  <option value="tip" selected={post_type === "tip"}>tip</option
+                  >
+                </select>
+              </div>
 
-        <div>
-          <label for="post_type">Tipo</label><br />
-          <select id="post_type" name="post_type">
-            <option value="blog" selected={post_type === 'blog'}>blog</option>
-            <option value="news" selected={post_type === 'news'}>news</option>
-            <option value="tip" selected={post_type === 'tip'}>tip</option>
-          </select>
-        </div>
+              <div class="form-group">
+                <label for="status">Estado</label>
+                <select id="status" name="status" class="form-select">
+                  <option value="draft" selected={status === "draft"}
+                    >draft</option
+                  >
+                  <option value="published" selected={status === "published"}
+                    >published</option
+                  >
+                  <option value="archived" selected={status === "archived"}
+                    >archived</option
+                  >
+                </select>
+              </div>
 
-        <div>
-          <label for="status">Estado</label><br />
-          <select id="status" name="status">
-            <option value="draft" selected={status === 'draft'}>draft</option>
-            <option value="published" selected={status === 'published'}>published</option>
-            <option value="archived" selected={status === 'archived'}>archived</option>
-          </select>
-        </div>
+              <div class="form-group form-group--full">
+                <label for="cover_image">Banner / imagen destacada</label>
+                <input
+                  id="cover_image"
+                  name="cover_image"
+                  type="file"
+                  accept="image/*"
+                  class="form-file"
+                />
+              </div>
+            </div>
 
-        <br />
-        <button type="submit">Guardar publicación</button>
-      </form>
+            <br />
+            <div class="form-actions">
+              <button type="submit" class="secondary-button"
+                >Guardar publicación</button
+              >
+            </div>
+          </form>
+
+          <script>
+            window.addEventListener("DOMContentLoaded", () => {
+              if (!window.tinymce) return;
+
+              window.tinymce.init({
+                selector: "#content_html",
+                menubar: false,
+                plugins: "link lists code table fontsize",
+                toolbar:
+                  "undo redo | blocks fontsize | bold italic underline | bullist numlist | link table | code",
+                height: 420,
+                fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt 36pt 48pt 72pt"
+              });
+
+              const form = document.getElementById("post-form");
+              form?.addEventListener("submit", () => {
+                window.tinymce?.triggerSave();
+              });
+            });
+          </script>
+        </section>
+      </div>
     </main>
   </body>
 </html>

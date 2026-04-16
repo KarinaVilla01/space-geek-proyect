@@ -164,7 +164,7 @@ El administrador debe poder entrar al panel y visualizar la lista de publicacion
 - [x] Capturar `title`
 - [x] Capturar `slug`
 - [x] Capturar `excerpt`
-- [x] Capturar `content_md`
+- [x] Capturar `content_html`
 - [x] Capturar `post_type`
 - [x] Capturar `status`
 
@@ -182,18 +182,18 @@ El administrador debe poder crear publicaciones nuevas y guardarlas como borrado
 ## Fase 7 - Editar y cambiar estado de publicaciones
 
 ### 7.1 Edición de publicación
-- [ ] Crear ruta `/admin/posts/[id]/edit`
-- [ ] Cargar datos actuales del post
-- [ ] Permitir actualizar contenido
-- [ ] Permitir actualizar extracto
-- [ ] Permitir actualizar tipo de publicación
+- [x] Crear ruta `/admin/posts/[id]/edit`
+- [x] Cargar datos actuales del post
+- [x] Permitir actualizar contenido
+- [x] Permitir actualizar extracto
+- [x] Permitir actualizar tipo de publicación
 
 ### 7.2 Cambio de estado
-- [ ] Permitir cambio a `draft`
-- [ ] Permitir cambio a `published`
-- [ ] Permitir cambio a `archived`
-- [ ] Asignar `published_at` automáticamente al publicar
-- [ ] Confirmar que `published_at` se conserva si luego se archiva
+- [x] Permitir cambio a `draft`
+- [x] Permitir cambio a `published`
+- [x] Permitir cambio a `archived`
+- [x] Asignar `published_at` automáticamente al publicar
+- [x] Confirmar que `published_at` se conserva si luego se archiva
 
 ### Resultado esperado de la fase
 El administrador debe poder editar publicaciones existentes y controlar su visibilidad mediante el estado.
@@ -203,21 +203,21 @@ El administrador debe poder editar publicaciones existentes y controlar su visib
 ## Fase 8 - Sitio público
 
 ### 8.1 Listado de publicaciones públicas
-- [ ] Crear ruta `/posts`
-- [ ] Consultar solo publicaciones con `status = published`
-- [ ] Mostrar lista pública con información básica
-- [ ] Confirmar que no aparezcan drafts ni archived
+- [x] Crear ruta `/posts`
+- [x] Consultar solo publicaciones con `status = published`
+- [x] Mostrar lista pública con información básica
+- [x] Confirmar que no aparezcan drafts ni archived
 
 ### 8.2 Detalle de publicación
-- [ ] Crear ruta `/posts/[slug]`
-- [ ] Mostrar contenido completo del post
-- [ ] Resolver publicación por `slug`
-- [ ] Manejar caso de slug inexistente
+- [x] Crear ruta `/posts/[slug]`
+- [x] Mostrar contenido completo del post
+- [x] Resolver publicación por `slug`
+- [x] Manejar caso de slug inexistente
 
 ### 8.3 Landing principal
-- [ ] Definir estructura mínima de `/`
-- [ ] Mostrar acceso o vista resumida del contenido publicado
-- [ ] Mantener separación clara entre sitio público y admin
+- [x] Definir estructura mínima de `/`
+- [x] Mostrar acceso o vista resumida del contenido publicado
+- [x] Mantener separación clara entre sitio público y admin
 
 ### Resultado esperado de la fase
 El visitante debe poder navegar publicaciones públicas sin iniciar sesión.
@@ -246,7 +246,7 @@ El administrador debe poder asociar una imagen destacada a cada publicación.
 
 ### 10.1 Validaciones funcionales
 - [ ] Validar que `title` sea obligatorio
-- [ ] Validar que `content_md` sea obligatorio al publicar
+- [ ] Validar que `content_html` sea obligatorio al publicar
 - [ ] Validar que `slug` sea obligatorio y único
 - [ ] Validar que `post_type` esté dentro de valores permitidos
 - [ ] Validar que `status` esté dentro de valores permitidos

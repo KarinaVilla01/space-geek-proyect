@@ -2,6 +2,7 @@
 export const prerender = false
 
 import { createSupabaseClient } from '../../lib/supabase'
+import '../../styles/global.css'
 
 const supabase = createSupabaseClient()
 
@@ -54,19 +55,37 @@ if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
   </head>
   <body>
     <main>
-      <h1>Admin Dashboard</h1>
-      <p>Bienvenida, {user.email}</p>
+      <div class="dashboard">
+        <section class="hero">
+          <div class="hero__header">
+            <div class="hero__text">
+              <p class="eyebrow">Panel administrativo</p>
+              <h1>Bienvenida, {user.email}</h1>
+              <p>Gestiona tus publicaciones, crea contenido nuevo y controla tu admin desde un panel limpio, rápido y enfocado.</p>
+            </div>
+            <div class="actions">
+              <form action="/api/auth/logout" method="get">
+                <button type="submit" class="logout-button">Cerrar sesión</button>
+              </form>
+            </div>
+          </div>
+        </section>
 
-      <nav>
-        <ul>
-          <li><a href="/admin/posts">Ver publicaciones</a></li>
-          <li><a href="/admin/posts/new">Nueva publicación</a></li>
-        </ul>
-      </nav>
+        <section class="cards">
+          <article class="card">
+            <h2>Ver publicaciones</h2>
+            <p>Accede al listado de posts, revisa el estado y edita cada entrada rápidamente.</p>
+            <a href="/admin/posts">Ir a publicaciones</a>
+          </article>
 
-      <form action="/api/auth/logout" method="get">
-        <button type="submit">Logout</button>
-      </form>
+          <article class="card">
+            <h2>Nueva publicación</h2>
+            <p>Crea un nuevo artículo, sube imagen destacada y publica el contenido en tu sitio.</p>
+            <a href="/admin/posts/new">Crear publicación</a>
+          </article>
+        </section>
+
+      </div>
     </main>
   </body>
 </html>

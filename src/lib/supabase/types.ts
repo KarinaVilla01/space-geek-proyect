@@ -6,8 +6,8 @@ export interface Post {
   title: string
   slug: string
   excerpt: string | null
-  content_md: string
-  cover_image_url: string | null
+  content_html: string
+  cover_image_path: string | null
   status: PostStatus
   post_type: PostType
   published_at: string | null
@@ -20,8 +20,8 @@ export interface CreatePostInput {
   title: string
   slug: string
   excerpt?: string | null
-  content_md: string
-  cover_image_url?: string | null
+  content_html: string
+  cover_image_path?: string | null
   status?: PostStatus
   post_type: PostType
   published_at?: string | null
@@ -32,8 +32,8 @@ export interface UpdatePostInput {
   title?: string
   slug?: string
   excerpt?: string | null
-  content_md?: string
-  cover_image_url?: string | null
+  content_html?: string
+  cover_image_path?: string | null
   status?: PostStatus
   post_type?: PostType
   published_at?: string | null

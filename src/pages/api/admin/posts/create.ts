@@ -43,7 +43,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const rawTitle = String(formData.get('title') ?? '').trim()
   const rawSlug = String(formData.get('slug') ?? '').trim()
   const rawExcerpt = String(formData.get('excerpt') ?? '').trim()
-  const rawContent = String(formData.get('content_md') ?? '').trim()
+  const rawContent = String(formData.get('content_html') ?? '')
   const rawPostType = String(formData.get('post_type') ?? 'blog').trim()
   const rawStatus = String(formData.get('status') ?? 'draft').trim()
 
@@ -51,8 +51,8 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     title: rawTitle,
     slug: ensureUniqueSlugBase(rawSlug || rawTitle),
     excerpt: rawExcerpt,
-    content_md: rawContent,
-    cover_image_url: '',
+    content_html: rawContent,
+    cover_image_path: '',
     status: rawStatus,
     post_type: rawPostType,
   })
@@ -61,17 +61,27 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     title: rawTitle,
     slug: rawSlug,
     excerpt: rawExcerpt,
-    content_md: rawContent,
+    content_html: rawContent,
     post_type: rawPostType,
     status: rawStatus,
   })
+
 
   if (!parsed.success) {
     const firstError = parsed.error.issues[0]?.message ?? 'Invalid form data'
     return redirect(`/admin/posts/new?error=${encodeURIComponent(firstError)}&${backParams.toString()}`)
   }
-  
+
   const values = parsed.data
+
+  if (values.status === 'published') {
+    const plainText = values.content_html.replace(/<[^>]*>/g, '').trim()
+    if (plainText.length === 0) {
+      return redirect(
+        `/admin/posts/new?error=${encodeURIComponent('Content is required to publish a post')}&${backParams.toString()}`
+      )
+    }
+  }
 
   const { data: existingSlug } = await supabase
     .from('posts')
@@ -86,22 +96,47 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   }
 
   const publishedAt = values.status === 'published' ? new Date().toISOString() : null
-  
-  if (values.status === 'published' && values.content_md.trim().length === 0) {
-    return redirect(
-      `/admin/posts/new?error=${encodeURIComponent('Content is required to publish a post')}&${backParams.toString()}`
-    )
+
+  const file = formData.get('cover_image')
+
+  let coverImagePath: string | null = null
+
+  const hasFile =
+    file instanceof File ||
+    (file && typeof (file as any).size === 'number' && typeof (file as any).name === 'string')
+
+  if (hasFile && (file as File).size > 0) {
+    const uploadFile = file as File
+    const ext = uploadFile.name.split('.').pop()?.toLowerCase() || 'bin'
+    const filePath = `drafts/${user.id}/cover-${Date.now()}.${ext}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('post-images')
+      .upload(filePath, uploadFile, {
+        cacheControl: '3600',
+        contentType: uploadFile.type || undefined,
+        upsert: false,
+      })
+
+    if (uploadError) {
+      return redirect(
+        `/admin/posts/new?error=${encodeURIComponent(uploadError.message)}&${backParams.toString()}`
+      )
+    }
+
+    coverImagePath = filePath
   }
 
   const { error } = await supabase.from('posts').insert({
     title: values.title,
     slug: values.slug,
     excerpt: values.excerpt || null,
-    content_md: values.content_md,
+    content_html: values.content_html,
     status: values.status,
     post_type: values.post_type,
     published_at: publishedAt,
     author_id: user.id,
+    cover_image_path: coverImagePath,
   })
 
   if (error) {

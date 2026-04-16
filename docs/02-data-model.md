@@ -70,8 +70,8 @@ Un post puede corresponder a alguno de los tipos definidos en v1:
 | `title` | `text` | Sí | Título principal del post. |
 | `slug` | `text` | Sí | Identificador único para URL amigable. |
 | `excerpt` | `text` | No | Resumen corto del contenido. |
-| `content_md` | `text` | Sí | Contenido principal de la publicación. |
-| `cover_image_url` | `text` | No | URL o ruta de imagen destacada. |
+| `content_html` | `text` | Sí | Contenido principal de la publicación. |
+| `cover_image_path` | `text` | No | URL o ruta de imagen destacada. |
 | `status` | `text` | Sí | Estado de la publicación: `draft`, `published` o `archived`. |
 | `post_type` | `text` | Sí | Tipo de contenido: `blog`, `news` o `tip`. |
 | `published_at` | `timestamptz` | No | Fecha de publicación. Se asigna automáticamente al publicar. |
@@ -82,7 +82,7 @@ Un post puede corresponder a alguno de los tipos definidos en v1:
 ### Reglas
 - `slug` debe ser único
 - `title` es obligatorio
-- `content_md` es obligatorio
+- `content_html` es obligatorio
 - `status` solo puede ser:
   - `draft`
   - `published`
