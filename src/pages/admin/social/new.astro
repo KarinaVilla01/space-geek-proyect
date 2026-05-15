@@ -1,0 +1,204 @@
+---
+export const prerender = false;
+
+import { createSupabaseClient } from '../../../lib/supabase';
+import '../../../styles/global.css';
+
+const supabase = createSupabaseClient();
+
+const accessToken = Astro.cookies.get('sb-access-token');
+const refreshToken = Astro.cookies.get('sb-refresh-token');
+
+if (!accessToken || !refreshToken) {
+  return Astro.redirect('/admin/login');
+}
+
+let sessionResult;
+
+try {
+  sessionResult = await supabase.auth.setSession({
+    access_token: accessToken.value,
+    refresh_token: refreshToken.value,
+  });
+
+  if (sessionResult.error || !sessionResult.data.user) {
+    Astro.cookies.delete('sb-access-token', { path: '/' });
+    Astro.cookies.delete('sb-refresh-token', { path: '/' });
+    return Astro.redirect('/admin/login');
+  }
+} catch {
+  Astro.cookies.delete('sb-access-token', { path: '/' });
+  Astro.cookies.delete('sb-refresh-token', { path: '/' });
+  return Astro.redirect('/admin/login');
+}
+
+const user = sessionResult.data.user;
+
+const { data: adminUser } = await supabase
+  .from('admin_users')
+  .select('id, role, is_active')
+  .eq('id', user.id)
+  .maybeSingle();
+
+if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
+  Astro.cookies.delete('sb-access-token', { path: '/' });
+  Astro.cookies.delete('sb-refresh-token', { path: '/' });
+  return Astro.redirect('/admin/login?error=Not%20authorized');
+}
+
+const error = Astro.url.searchParams.get('error');
+const success = Astro.url.searchParams.get('success');
+const platform = Astro.url.searchParams.get('platform') ?? 'youtube';
+const url = Astro.url.searchParams.get('url') ?? '';
+const external_id = Astro.url.searchParams.get('external_id') ?? '';
+const title = Astro.url.searchParams.get('title') ?? '';
+const description = Astro.url.searchParams.get('description') ?? '';
+const image_url = Astro.url.searchParams.get('image_url') ?? '';
+const published_at = Astro.url.searchParams.get('published_at') ?? '';
+const priority = Astro.url.searchParams.get('priority') ?? '0';
+const active = Astro.url.searchParams.get('active') !== 'false';
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Agregar contenido social</title>
+  </head>
+  <body>
+    <main>
+      <div class="dashboard">
+        <section class="hero">
+          <div class="hero__header">
+            <div class="hero__text">
+              <p class="eyebrow">Nueva entrada social</p>
+              <h1>Agrega contenido de YouTube, Instagram o X</h1>
+            </div>
+            <div class="actions actions--row">
+              <a class="secondary-button" href="/admin">Volver al panel</a>
+              <a class="secondary-button" href="/admin/social">Ver entradas sociales</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-card">
+          {error && (
+            <div class="notification notification--error">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+
+          {success && (
+            <div class="notification notification--success">
+              <strong>{success}</strong>
+            </div>
+          )}
+
+          <form method="POST" action="/api/admin/social/create" class="post-form" id="social-form">
+            <div class="form-grid">
+
+              <div class="form-group">
+                <label for="platform">Plataforma</label>
+                <select id="platform" name="platform" class="form-select" required>
+                  <option value="youtube" selected={platform === 'youtube'}>YouTube</option>
+                  <option value="instagram" selected={platform === 'instagram'}>Instagram</option>
+                  <option value="x" selected={platform === 'x'}>X</option>
+                </select>
+              </div>
+
+              <!-- Campo URL siempre visible -->
+              <div class="form-group form-group--full">
+                <label for="url" id="url-label">URL del video</label>
+                <input id="url" name="url" type="url" value={url} required class="form-input"
+                  placeholder="https://www.youtube.com/watch?v=..." />
+                <p class="form-hint" id="url-hint">Pega la URL del video de YouTube. El título y miniatura se obtienen automáticamente.</p>
+              </div>
+
+              <!-- Título opcional para YouTube, requerido para otros -->
+              <div class="form-group form-group--full" id="title-group">
+                <label for="title" id="title-label">Título <span id="title-optional" style="font-weight:normal;color:var(--color-muted)">(opcional, se auto-obtiene)</span></label>
+                <input id="title" name="title" type="text" value={title} class="form-input"
+                  placeholder="Se completa automáticamente desde YouTube" />
+              </div>
+
+              <!-- Campos solo para Instagram / X -->
+              <div id="manual-fields" style="display:contents">
+                <div class="form-group" id="external-id-group">
+                  <label for="external_id">ID externo <span style="font-weight:normal;color:var(--color-muted)">(post ID, tweet ID…)</span></label>
+                  <input id="external_id" name="external_id" type="text" value={external_id} class="form-input" />
+                </div>
+
+                <div class="form-group form-group--full" id="description-group">
+                  <label for="description">Descripción</label>
+                  <textarea id="description" name="description" rows="3" class="form-textarea">{description}</textarea>
+                </div>
+
+                <div class="form-group form-group--full" id="image-url-group">
+                  <label for="image_url">URL de imagen</label>
+                  <input id="image_url" name="image_url" type="url" value={image_url} class="form-input" />
+                </div>
+
+                <div class="form-group" id="published-at-group">
+                  <label for="published_at">Fecha de publicación</label>
+                  <input id="published_at" name="published_at" type="datetime-local" value={published_at} class="form-input" />
+                </div>
+              </div>
+
+              <!-- Prioridad y activo siempre visibles -->
+              <div class="form-group">
+                <label for="priority">Prioridad</label>
+                <input id="priority" name="priority" type="number" min="0" value={priority} class="form-input" />
+              </div>
+
+              <div class="form-group form-group--checkbox">
+                <label for="active">Activo</label>
+                <input id="active" name="active" type="checkbox" checked={active} />
+              </div>
+
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="secondary-button" id="submit-btn">Guardar video</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const platformSelect = document.getElementById('platform') as HTMLSelectElement;
+      const manualFields = document.querySelectorAll<HTMLElement>('#external-id-group, #description-group, #image-url-group, #published-at-group');
+      const urlLabel = document.getElementById('url-label')!;
+      const urlInput = document.getElementById('url') as HTMLInputElement;
+      const urlHint = document.getElementById('url-hint')!;
+      const titleOptional = document.getElementById('title-optional')!;
+      const titleInput = document.getElementById('title') as HTMLInputElement;
+      const submitBtn = document.getElementById('submit-btn')!;
+
+      function updateForm(platform: string) {
+        if (platform === 'youtube') {
+          manualFields.forEach(el => el.style.display = 'none');
+          urlLabel.textContent = 'URL del video';
+          urlInput.placeholder = 'https://www.youtube.com/watch?v=...';
+          urlHint.style.display = '';
+          titleOptional.style.display = '';
+          titleInput.required = false;
+          submitBtn.textContent = 'Guardar video';
+        } else {
+          manualFields.forEach(el => el.style.display = '');
+          urlLabel.textContent = platform === 'instagram' ? 'URL de la publicación' : 'URL del tweet';
+          urlInput.placeholder = platform === 'instagram'
+            ? 'https://www.instagram.com/p/...'
+            : 'https://x.com/usuario/status/...';
+          urlHint.style.display = 'none';
+          titleOptional.style.display = 'none';
+          titleInput.required = true;
+          submitBtn.textContent = 'Guardar entrada';
+        }
+      }
+
+      updateForm(platformSelect.value);
+      platformSelect.addEventListener('change', () => updateForm(platformSelect.value));
+    </script>
+  </body>
+</html>

@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "astro dev",
     "local": "wrangler dev --local",
-    "build": "astro build",
+"build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
     "generate-types": "wrangler types"

@@ -2,7 +2,7 @@
 	"compatibility_date": "2026-04-15",
 	"compatibility_flags": ["global_fetch_strictly_public"],
 	"name": "empty",
-	"main": "@astrojs/cloudflare/entrypoints/server",
+	"main": "./src/cloudflare-entry.ts",
 	"assets": {
 		"directory": "./dist",
 		"binding": "ASSETS"

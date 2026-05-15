@@ -1,49 +1,61 @@
-// import type { MiddlewareHandler } from 'astro'
-// import { createSupabaseServerClient } from './lib/supabase/server'
+import type { MiddlewareHandler } from 'astro'
+import { createSupabaseClient } from './lib/supabase'
 
-// export const onRequest: MiddlewareHandler = async (context, next) => {
-//   const pathname = context.url.pathname
-//   const isAdminRoute = pathname.startsWith('/admin')
-//   const isLoginRoute = pathname === '/admin/login'
+export const onRequest: MiddlewareHandler = async (context, next) => {
+  const pathname = context.url.pathname
+  const isAdminRoute = pathname.startsWith('/admin')
+  const isLoginRoute = pathname === '/admin/login'
 
-//   if (!isAdminRoute) {
-//     return next()
-//   }
+  if (!isAdminRoute) {
+    return next()
+  }
 
-//   const supabase = createSupabaseServerClient(context.request, context.cookies)
-//   const {
-//     data: { claims },
-//     error: claimsError,
-//   } = await supabase.auth.getClaims()
+  const accessToken = context.cookies.get('sb-access-token')
+  const refreshToken = context.cookies.get('sb-refresh-token')
 
-//   const userId = claims?.sub ?? null
+  // No hay cookies → solo permitir la página de login
+  if (!accessToken?.value || !refreshToken?.value) {
+    if (isLoginRoute) return next()
+    return context.redirect('/admin/login')
+  }
 
-//   if (!userId) {
-//     if (isLoginRoute) return next()
-//     return context.redirect('/admin/login')
-//   }
+  // Validar sesión con Supabase
+  const supabase = createSupabaseClient()
+  const { data, error } = await supabase.auth.setSession({
+    access_token: accessToken.value,
+    refresh_token: refreshToken.value,
+  })
 
-//   const { data: adminUser, error: adminError } = await supabase
-//     .from('admin_users')
-//     .select('id, role, is_active')
-//     .eq('id', userId)
-//     .maybeSingle()
+  if (error || !data.user) {
+    context.cookies.delete('sb-access-token', { path: '/' })
+    context.cookies.delete('sb-refresh-token', { path: '/' })
+    if (isLoginRoute) return next()
+    return context.redirect('/admin/login')
+  }
 
-//   const isAuthorizedAdmin =
-//     !claimsError &&
-//     !adminError &&
-//     !!adminUser &&
-//     adminUser.role === 'admin' &&
-//     adminUser.is_active === true
+  // Verificar que el usuario está en admin_users con rol activo
+  const { data: adminUser } = await supabase
+    .from('admin_users')
+    .select('id, role, is_active')
+    .eq('id', data.user.id)
+    .maybeSingle()
 
-//   if (isLoginRoute && isAuthorizedAdmin) {
-//     return context.redirect('/admin')
-//   }
+  const isAuthorized =
+    !!adminUser &&
+    adminUser.role === 'admin' &&
+    adminUser.is_active === true
 
-//   if (!isAuthorizedAdmin) {
-//     await supabase.auth.signOut()
-//     return context.redirect('/admin/login')
-//   }
+  // Usuario autorizado intenta entrar al login → mandarlo al panel
+  if (isLoginRoute && isAuthorized) {
+    return context.redirect('/admin')
+  }
 
-//   return next()
-// }
+  // Usuario no autorizado en ruta admin → limpiar y mandar al login
+  if (!isAuthorized) {
+    context.cookies.delete('sb-access-token', { path: '/' })
+    context.cookies.delete('sb-refresh-token', { path: '/' })
+    return context.redirect('/admin/login')
+  }
+
+  return next()
+}

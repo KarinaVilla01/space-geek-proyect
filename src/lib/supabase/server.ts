@@ -1,23 +1,26 @@
-// import { createSupabaseClient, parseCookieHeader } from '@supabase/ssr'
-// import type { AstroCookies } from 'astro'
+import { createClient } from '@supabase/supabase-js';
 
-// const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL
-// const supabaseAnonKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+function getAdminClient() {
+  const url = import.meta.env.PUBLIC_SUPABASE_URL;
+  const key = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
 
-// if (!supabaseUrl) throw new Error('Missing PUBLIC_SUPABASE_URL')
-// if (!supabaseAnonKey) throw new Error('Missing PUBLIC_SUPABASE_ANON_KEY')
+  if (!url) throw new Error('Missing PUBLIC_SUPABASE_URL');
+  if (!key) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY');
 
-// export function createSupabaseServerClient(request: Request, cookies: AstroCookies) {
-//   return createSupabaseClient(supabaseUrl, supabaseAnonKey, {
-//     cookies: {
-//       getAll() {
-//         return parseCookieHeader(request.headers.get('Cookie') ?? '')
-//       },
-//       setAll(cookiesToSet) {
-//         cookiesToSet.forEach(({ name, value, options }) => {
-//           cookies.set(name, value, options)
-//         })
-//       },
-//     },
-//   })
-// }
+  return createClient(url, key, { auth: { persistSession: false } });
+}
+
+export const supabaseAdmin = getAdminClient();
+
+export function createSupabaseServerClient(request: Request, _cookies: unknown) {
+  const url = import.meta.env.PUBLIC_SUPABASE_URL;
+  const key = import.meta.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url) throw new Error('Missing PUBLIC_SUPABASE_URL');
+  if (!key) throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY');
+
+  return createClient(url, key, {
+    auth: { persistSession: false },
+    global: { headers: { Authorization: request.headers.get('Authorization') || '' } },
+  });
+}

@@ -20,7 +20,9 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   })
 
   if (error || !data.session || !data.user) {
-    return redirect('/admin/login?error=Invalid%20credentials')
+    const isDev = import.meta.env.DEV
+    const msg = isDev && error ? `[DEV] ${error.message}` : 'Credenciales incorrectas'
+    return redirect(`/admin/login?error=${encodeURIComponent(msg)}`)
   }
 
   const { access_token, refresh_token } = data.session

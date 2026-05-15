@@ -1,0 +1,297 @@
+---
+export const prerender = false;
+
+import { createSupabaseClient } from '../../../lib/supabase';
+import { supabaseAdmin } from '../../../lib/supabase/server';
+import '../../../styles/global.css';
+
+const supabase = createSupabaseClient();
+
+const accessToken = Astro.cookies.get('sb-access-token');
+const refreshToken = Astro.cookies.get('sb-refresh-token');
+
+if (!accessToken || !refreshToken) {
+  return Astro.redirect('/admin/login');
+}
+
+let sessionResult;
+try {
+  sessionResult = await supabase.auth.setSession({
+    access_token: accessToken.value,
+    refresh_token: refreshToken.value,
+  });
+  if (sessionResult.error || !sessionResult.data.user) {
+    Astro.cookies.delete('sb-access-token', { path: '/' });
+    Astro.cookies.delete('sb-refresh-token', { path: '/' });
+    return Astro.redirect('/admin/login');
+  }
+} catch {
+  Astro.cookies.delete('sb-access-token', { path: '/' });
+  Astro.cookies.delete('sb-refresh-token', { path: '/' });
+  return Astro.redirect('/admin/login');
+}
+
+const { data: adminUser } = await supabase
+  .from('admin_users')
+  .select('id, role, is_active')
+  .eq('id', sessionResult.data.user.id)
+  .maybeSingle();
+
+if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
+  Astro.cookies.delete('sb-access-token', { path: '/' });
+  Astro.cookies.delete('sb-refresh-token', { path: '/' });
+  return Astro.redirect('/admin/login?error=Not%20authorized');
+}
+
+const { data: entries } = await supabaseAdmin
+  .from('social_media_posts')
+  .select('platform, url, priority')
+  .order('priority', { ascending: false })
+  .order('inserted_at', { ascending: false });
+
+const byPlatform = {
+  youtube:   (entries ?? []).filter(e => e.platform === 'youtube').map(e => e.url),
+  instagram: (entries ?? []).filter(e => e.platform === 'instagram').map(e => e.url),
+  x:         (entries ?? []).filter(e => e.platform === 'x').map(e => e.url),
+};
+
+const MAX = 10;
+const urlError   = Astro.url.searchParams.get('error');
+const urlSuccess = Astro.url.searchParams.get('success');
+
+const platforms = [
+  {
+    key: 'youtube',
+    label: 'YouTube',
+    inputName: 'youtube_url',
+    placeholder: 'https://www.youtube.com/watch?v=...',
+    hint: 'El título y miniatura se obtienen automáticamente vía oEmbed.',
+    urls: byPlatform.youtube,
+  },
+  {
+    key: 'instagram',
+    label: 'Instagram',
+    inputName: 'instagram_url',
+    placeholder: 'https://www.instagram.com/p/...',
+    hint: 'Usa la URL de la publicación (post, reel o IGTV).',
+    urls: byPlatform.instagram,
+  },
+  {
+    key: 'x',
+    label: 'X',
+    inputName: 'x_url',
+    placeholder: 'https://x.com/usuario/status/...',
+    hint: 'Usa la URL del tweet o publicación de X.',
+    urls: byPlatform.x,
+  },
+] as const;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin — Contenido social</title>
+    <style>
+      .platform-section {
+        border: 1px solid var(--color-border, #e2e8f0);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+      }
+      .platform-section h2 {
+        margin: 0 0 0.25rem;
+        font-size: 1.1rem;
+      }
+      .platform-hint {
+        font-size: 0.82rem;
+        color: var(--color-muted, #64748b);
+        margin: 0 0 1rem;
+      }
+      .url-row {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+      .url-row input {
+        flex: 1;
+      }
+      .platform-footer {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-top: 0.75rem;
+      }
+      .platform-count {
+        font-size: 0.82rem;
+        color: var(--color-muted, #64748b);
+      }
+      .platform-count.is-full {
+        color: var(--color-danger, #dc2626);
+        font-weight: 600;
+      }
+      .form-actions-main {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+        padding-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="dashboard">
+        <section class="hero">
+          <div class="hero__header">
+            <div class="hero__text">
+              <p class="eyebrow">Contenido social destacado</p>
+              <h1>Gestión de enlaces sociales</h1>
+              <p>
+                Los enlaces que guardes aquí aparecen en el panel derecho de la página de inicio,
+                agrupados por plataforma. Máximo <strong>{MAX}</strong> URLs por plataforma.
+              </p>
+            </div>
+            <div class="actions actions--row">
+              <a class="secondary-button" href="/admin">Volver al panel</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-card">
+          {urlError && (
+            <div class="notification notification--error">
+              <strong>Error:</strong> {urlError}
+            </div>
+          )}
+          {urlSuccess && (
+            <div class="notification notification--success">
+              <strong>{urlSuccess}</strong>
+            </div>
+          )}
+
+          <form id="social-form" method="POST" action="/api/admin/social/save">
+
+            {platforms.map(({ key, label, inputName, placeholder, hint, urls }) => (
+              <div class="platform-section" id={`${key}-section`}>
+                <h2>{label}</h2>
+                <p class="platform-hint">{hint}</p>
+
+                <div class="inputs-container" id={`${key}-inputs`}>
+                  {urls.map(url => (
+                    <div class="url-row">
+                      <input
+                        type="url"
+                        name={inputName}
+                        value={url}
+                        placeholder={placeholder}
+                        required
+                        class="form-input"
+                      />
+                      <button type="button" class="danger-button remove-btn">Eliminar</button>
+                    </div>
+                  ))}
+                </div>
+
+                <div class="platform-footer">
+                  <button
+                    type="button"
+                    class="secondary-button add-url-btn"
+                    data-container={`${key}-inputs`}
+                    data-name={inputName}
+                    data-placeholder={placeholder}
+                    data-max={MAX}
+                  >
+                    + Agregar URL
+                  </button>
+                  <span class="platform-count" id={`${key}-count`}>
+                    {urls.length} / {MAX}
+                  </span>
+                </div>
+              </div>
+            ))}
+
+            <div class="form-actions-main">
+              <button type="submit" class="secondary-button">Guardar cambios</button>
+              <span class="note">Solo se guardarán los inputs que estén completos y sin campos vacíos.</span>
+            </div>
+
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const MAX = 10;
+
+      function getCountEl(containerId) {
+        return document.getElementById(containerId.replace('-inputs', '-count'));
+      }
+
+      function updateCount(containerId) {
+        const container = document.getElementById(containerId);
+        const count = container.querySelectorAll('.url-row').length;
+        const countEl = getCountEl(containerId);
+        countEl.textContent = `${count} / ${MAX}`;
+        countEl.classList.toggle('is-full', count >= MAX);
+
+        const addBtn = document.querySelector(`[data-container="${containerId}"]`);
+        addBtn.disabled = count >= MAX;
+      }
+
+      function attachRemoveListener(btn, containerId) {
+        btn.addEventListener('click', () => {
+          btn.closest('.url-row').remove();
+          updateCount(containerId);
+        });
+      }
+
+      function addUrlRow(containerId, name, placeholder) {
+        const container = document.getElementById(containerId);
+        if (container.querySelectorAll('.url-row').length >= MAX) return;
+
+        const row = document.createElement('div');
+        row.className = 'url-row';
+        row.innerHTML = `
+          <input type="url" name="${name}" placeholder="${placeholder}" required class="form-input" />
+          <button type="button" class="danger-button remove-btn">Eliminar</button>
+        `;
+        container.appendChild(row);
+
+        attachRemoveListener(row.querySelector('.remove-btn'), containerId);
+        updateCount(containerId);
+
+        row.querySelector('input').focus();
+      }
+
+      // Init existing remove buttons
+      document.querySelectorAll('.inputs-container').forEach(container => {
+        const containerId = container.id;
+        container.querySelectorAll('.remove-btn').forEach(btn => {
+          attachRemoveListener(btn, containerId);
+        });
+        updateCount(containerId);
+      });
+
+      // Init add buttons
+      document.querySelectorAll('.add-url-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          addUrlRow(btn.dataset.container, btn.dataset.name, btn.dataset.placeholder);
+        });
+      });
+
+      // Pre-submit validation: no empty inputs allowed
+      document.getElementById('social-form').addEventListener('submit', (e) => {
+        const empties = document.querySelectorAll('#social-form input[type="url"]');
+        for (const input of empties) {
+          if (!input.value.trim()) {
+            e.preventDefault();
+            input.focus();
+            input.reportValidity();
+            return;
+          }
+        }
+      });
+    </script>
+  </body>
+</html>

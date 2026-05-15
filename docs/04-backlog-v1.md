@@ -227,15 +227,15 @@ El visitante debe poder navegar publicaciones públicas sin iniciar sesión.
 ## Fase 9 - Imágenes destacadas
 
 ### 9.1 Storage
-- [ ] Configurar bucket para imágenes
-- [ ] Definir convención de nombre o ruta de archivos
-- [ ] Validar acceso a imágenes desde el sitio
+- [x] Configurar bucket para imágenes
+- [x] Definir convención de nombre o ruta de archivos
+- [x] Validar acceso a imágenes desde el sitio
 
 ### 9.2 Integración en publicaciones
-- [ ] Permitir subir imagen destacada desde el panel
-- [ ] Guardar referencia de imagen en `posts`
-- [ ] Mostrar imagen en listado público
-- [ ] Mostrar imagen en detalle de publicación
+- [x] Permitir subir imagen destacada desde el panel
+- [x] Guardar referencia de imagen en `posts`
+- [x] Mostrar imagen en listado público
+- [x] Mostrar imagen en detalle de publicación
 
 ### Resultado esperado de la fase
 El administrador debe poder asociar una imagen destacada a cada publicación.
@@ -245,11 +245,11 @@ El administrador debe poder asociar una imagen destacada a cada publicación.
 ## Fase 10 - Validaciones y calidad mínima
 
 ### 10.1 Validaciones funcionales
-- [ ] Validar que `title` sea obligatorio
-- [ ] Validar que `content_html` sea obligatorio al publicar
-- [ ] Validar que `slug` sea obligatorio y único
-- [ ] Validar que `post_type` esté dentro de valores permitidos
-- [ ] Validar que `status` esté dentro de valores permitidos
+- [x] Validar que `title` sea obligatorio
+- [x] Validar que `content_html` sea obligatorio al publicar
+- [x] Validar que `slug` sea obligatorio y único
+- [x] Validar que `post_type` esté dentro de valores permitidos
+- [x] Validar que `status` esté dentro de valores permitidos
 
 ### 10.2 Experiencia mínima de uso
 - [ ] Mostrar mensajes de error comprensibles
