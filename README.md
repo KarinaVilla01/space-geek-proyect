@@ -67,7 +67,27 @@ Desde el panel de Supabase, ve a **SQL Editor** y ejecuta en orden los archivos 
 2. `20260416024832_storage_policies.sql` — políticas de almacenamiento
 3. `20260505130000_social_media_posts.sql` — tabla `social_media_posts`
 
-### 4. Crear el primer usuario administrador
+### 4. Cargar datos de prueba (seed)
+
+El archivo `supabase/seed.sql` inserta posts de ejemplo para validar el flujo público del sitio. **Solo se ejecuta al correr:**
+
+```bash
+npx supabase db reset
+```
+
+> `supabase start` **no** vuelve a aplicar el seed. Solo `db reset` lo hace.
+
+Si quieres correr el seed sin resetear toda la base de datos:
+
+```bash
+npx supabase db execute --file supabase/seed.sql
+```
+
+> **Importante:** `db reset` elimina todos los datos, incluyendo el usuario administrador. Después de cada reset debes volver a crearlo (ver paso siguiente).
+
+---
+
+### 5. Crear el primer usuario administrador
 
 **Paso 1 — Crear el usuario en Supabase Auth:**
 
@@ -87,7 +107,7 @@ VALUES (
 );
 ```
 
-### 5. Iniciar el servidor de desarrollo
+### 6. Iniciar el servidor de desarrollo
 
 ```bash
 npm run dev

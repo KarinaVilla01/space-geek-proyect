@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro'
 import { createSupabaseClient } from '../../../../lib/supabase'
+import { supabaseAdmin } from '../../../../lib/supabase/server'
 import { createManualSocialEntry } from '../../../../lib/services/manualSocialService.mjs'
 import { normalizeSocialRow } from '../../../../lib/utils/socialUtils'
 import { socialEntryFormSchema } from '../../../../lib/validation/socialEntry.schema'
@@ -64,7 +65,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect('/admin/login?error=Not%20authorized')
   }
 
-  const { count: currentCount } = await supabase
+  const { count: currentCount } = await supabaseAdmin
     .from('social_media_posts')
     .select('*', { count: 'exact', head: true })
 
@@ -148,7 +149,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     raw_metadata: {},
   })
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('social_media_posts')
     .upsert(normalized, { onConflict: 'platform,external_id' })
 

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro'
 import { createSupabaseClient } from '../../../../lib/supabase'
+import { supabaseAdmin } from '../../../../lib/supabase/server'
 
 export const prerender = false
 
@@ -43,7 +44,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     return redirect('/admin/social?error=ID+no+válido')
   }
 
-  const { error } = await supabase
+  const { error } = await supabaseAdmin
     .from('social_media_posts')
     .delete()
     .eq('id', id)

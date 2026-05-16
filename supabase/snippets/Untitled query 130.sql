@@ -9,3 +9,9 @@ WHERE email = 'fil.01.21@gmail.com';
 SELECT a.email, au.role, au.is_active
 FROM auth.users a
 JOIN public.admin_users au ON a.id = au.id;
+
+insert into storage.buckets (id, name, public)
+values ('post-images', 'post-images', false)
+on conflict (id) do nothing;
+
+UPDATE storage.buckets SET public = true WHERE id = 'post-images';

@@ -1,5 +1,6 @@
 import type { APIRoute } from 'astro'
 import { createSupabaseClient } from '../../../../lib/supabase'
+import { supabaseAdmin } from '../../../../lib/supabase/server'
 import { postFormSchema } from '../../../../lib/validation/post.schema'
 import { ensureUniqueSlugBase } from '../../../../lib/utils/slug'
 
@@ -122,7 +123,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         const ext = uploadFile.name.split('.').pop()?.toLowerCase() || 'bin'
         const filePath = `drafts/${user.id}/cover-${Date.now()}.${ext}`
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await supabaseAdmin.storage
             .from('post-images')
             .upload(filePath, uploadFile, {
                 cacheControl: '3600',

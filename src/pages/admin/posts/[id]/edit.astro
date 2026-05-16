@@ -56,7 +56,7 @@ if (!postId) {
 const { data: post, error: postError } = await supabase
     .from("posts")
     .select(
-        "id, title, slug, excerpt, content_html, post_type, status, published_at",
+        "id, title, slug, excerpt, content_html, cover_image_path, post_type, status, published_at",
     )
     .eq("id", postId)
     .maybeSingle();
@@ -78,6 +78,9 @@ const status = Astro.url.searchParams.get("status") ?? post.status;
 
 const suggestedSlug = title ? ensureUniqueSlugBase(title) : post.slug;
 const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
+const currentImageUrl = post.cover_image_path
+    ? supabase.storage.from("post-images").getPublicUrl(post.cover_image_path).data.publicUrl
+    : null;
 ---
 
 <html lang="es">
@@ -97,11 +100,18 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
                         <div class="hero__text">
                             <p class="eyebrow">Editar publicación</p>
                             <h1>Modifica tu contenido</h1>
-                            <p>Actualiza el artículo, cambia la imagen destacada o ajusta el estado de publicación.</p>
+                            <p>
+                                Actualiza el artículo, cambia la imagen
+                                destacada o ajusta el estado de publicación.
+                            </p>
                         </div>
                         <div class="actions actions--row">
-                            <a class="secondary-button" href="/admin">Volver al panel</a>
-                            <a class="secondary-button" href="/admin/posts">Ver publicaciones</a>
+                            <a class="secondary-button" href="/admin"
+                                >Volver al panel</a
+                            >
+                            <a class="secondary-button" href="/admin/posts"
+                                >Ver publicaciones</a
+                            >
                         </div>
                     </div>
                 </section>
@@ -122,7 +132,13 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
                         )
                     }
 
-<form method="POST" action="/api/admin/posts/update" id="post-form" class="post-form">
+                    <form
+                        method="POST"
+                        action="/api/admin/posts/update"
+                        id="post-form"
+                        class="post-form"
+                        enctype="multipart/form-data"
+                    >
                         <input type="hidden" name="id" value={post.id} />
 
                         <div class="form-grid">
@@ -152,34 +168,25 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
 
                             <div class="form-group form-group--full">
                                 <label for="excerpt">Extracto</label>
-                                <textarea id="excerpt" name="excerpt" rows="3" class="form-textarea">{excerpt}</textarea>
+                                <textarea
+                                    id="excerpt"
+                                    name="excerpt"
+                                    rows="3"
+                                    class="form-textarea">{excerpt}</textarea
+                                >
                             </div>
 
                             <div class="form-group form-group--full">
-                                <label for="content_html">Contenido</label>
-                                <textarea id="content_html" name="content_html" class="form-textarea form-textarea--editor">{content_html}</textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="post_type">Tipo</label>
-                                <select id="post_type" name="post_type" class="form-select">
-                                    <option value="blog" selected={post_type === "blog"}>blog</option>
-                                    <option value="news" selected={post_type === "news"}>news</option>
-                                    <option value="tip" selected={post_type === "tip"}>tip</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="status">Estado</label>
-                                <select id="status" name="status" class="form-select">
-                                    <option value="draft" selected={status === "draft"}>draft</option>
-                                    <option value="published" selected={status === "published"}>published</option>
-                                    <option value="archived" selected={status === "archived"}>archived</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group form-group--full">
-                                <label for="cover_image">Banner / imagen destacada</label>
+                                <label for="cover_image"
+                                    >Banner / imagen destacada</label
+                                >
+                                {currentImageUrl && (
+                                    <img
+                                        src={currentImageUrl}
+                                        alt="Imagen actual"
+                                        style="max-height:120px;border-radius:6px;margin-bottom:0.5rem;display:block;"
+                                    />
+                                )}
                                 <input
                                     id="cover_image"
                                     name="cover_image"
@@ -188,35 +195,90 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
                                     class="form-file"
                                 />
                             </div>
+
+                            <div class="form-group form-group--full">
+                                <label for="content_html">Contenido</label>
+                                <textarea
+                                    id="content_html"
+                                    name="content_html"
+                                    class="form-textarea form-textarea--editor"
+                                    >{content_html}</textarea
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label for="post_type">Tipo</label>
+                                <select
+                                    id="post_type"
+                                    name="post_type"
+                                    class="form-select"
+                                >
+                                    <option value="blog" selected={post_type === "blog"}>blog</option>
+                                    <option value="news" selected={post_type === "news"}>news</option>
+                                    <option value="tip" selected={post_type === "tip"}>tip</option>
+                                    <option value="japon" selected={post_type === "japon"}>Japón</option>
+                                    <option value="cultura-otaku" selected={post_type === "cultura-otaku"}>Cultura Otaku</option>
+                                    <option value="anime" selected={post_type === "anime"}>Anime</option>
+                                    <option value="manga" selected={post_type === "manga"}>Manga</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="status">Estado</label>
+                                <select
+                                    id="status"
+                                    name="status"
+                                    class="form-select"
+                                >
+                                    <option
+                                        value="draft"
+                                        selected={status === "draft"}
+                                        >draft</option
+                                    >
+                                    <option
+                                        value="published"
+                                        selected={status === "published"}
+                                        >published</option
+                                    >
+                                    <option
+                                        value="archived"
+                                        selected={status === "archived"}
+                                        >archived</option
+                                    >
+                                </select>
+                            </div>
                         </div>
 
                         <div class="form-actions">
-                            <button type="submit" class="mt-2 secondary-button">Actualizar publicación</button>
+                            <button type="submit" class="mt-2 secondary-button"
+                                >Actualizar publicación</button
+                            >
                         </div>
-            </form>
+                    </form>
 
-            <script>
-                window.addEventListener("DOMContentLoaded", () => {
-                    if (!window.tinymce) return;
+                    <script>
+                        window.addEventListener("DOMContentLoaded", () => {
+                            if (!window.tinymce) return;
 
-                    window.tinymce.init({
-                        selector: "#content_html",
-                        menubar: false,
-                        plugins: "link lists code table fontsize",
-                        toolbar:
-                            "undo redo | blocks fontsize | bold italic underline | bullist numlist | link table | code",
-                        height: 420,
-                        fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt 36pt 48pt 72pt"
-                    });
+                            window.tinymce.init({
+                                selector: "#content_html",
+                                menubar: false,
+                                plugins: "link lists code table fontsize",
+                                toolbar:
+                                    "undo redo | blocks fontsize | bold italic underline | bullist numlist | link table | code",
+                                height: 420,
+                                fontsize_formats:
+                                    "8pt 10pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt 36pt 48pt 72pt",
+                            });
 
-                    const form = document.getElementById("post-form");
-                    form?.addEventListener("submit", () => {
-                        window.tinymce?.triggerSave();
-                    });
-                });
-            </script>
-            </section>
-        </div>
-    </main>
+                            const form = document.getElementById("post-form");
+                            form?.addEventListener("submit", () => {
+                                window.tinymce?.triggerSave();
+                            });
+                        });
+                    </script>
+                </section>
+            </div>
+        </main>
     </body>
 </html>

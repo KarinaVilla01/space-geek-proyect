@@ -67,8 +67,7 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
 
 <PublicLayout title="SpaceGeek | Blog">
   <div class="dashboard home-page">
-    <section class="hero hero--home">
-      <div class="hero__imgs">
+    <section class="hero__imgs">
         <div class="img-primary">
           <img
             src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img1.png"
@@ -91,7 +90,7 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
             </div>
           </div>
           <div class="imgSection imgSection--right">
-            <div class="img-superior-banner">
+            <div class="img-superior-banner bordeSuperiorRedondo">
               <img
                 src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img2.png"
                 alt=""
@@ -105,7 +104,6 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
             </div>
           </div>
         </div>
-      </div>
       <!-- <div class="hero__summary">
         <div class="summary-card">
           <span>Últimas publicaciones</span>
@@ -116,14 +114,6 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
 
     <section class="home-grid">
       <div class="home-main">
-        <div class="section-header">
-          <div>
-            <p class="eyebrow">Últimas novedades</p>
-            <h2>Historias destacadas</h2>
-          </div>
-          <a class="secondary-button" href="/posts">Ver más artículos</a>
-        </div>
-
         {
           !error && (!recentPosts || recentPosts.length === 0) && (
             <div class="note">No hay publicaciones publicadas todavía.</div>
@@ -142,7 +132,7 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
           !error && recentPosts && recentPosts.length > 0 && (
             <div class="post-list">
               {recentPosts.map((post) => (
-                <article class="post-card">
+                <a class="post-card" href={`/posts/${post.slug}`}>
                   {post.cover_image_path && (
                     <img
                       class="post-card__image"
@@ -157,53 +147,27 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
                   <div class="post-card__content">
                     <div class="post-card__meta">
                       <span class="tag-pill">{post.post_type}</span>
-                      <span>
-                        {new Date(post.published_at).toLocaleDateString(
-                          "es-ES",
-                          { year: "numeric", month: "short", day: "numeric" },
-                        )}
-                      </span>
                     </div>
-                    <h3 class="post-card__title">
-                      <a href={`/posts/${post.slug}`}>{post.title}</a>
-                    </h3>
+                    <h3 class="post-card__title">{post.title}</h3>
                     {post.excerpt && (
                       <p class="post-card__excerpt">{post.excerpt}</p>
                     )}
-                    <a class="table-link" href={`/posts/${post.slug}`}>
-                      Leer publicación
-                    </a>
+                     <span class="spanInfo">
+                        {new Date(post.published_at).toLocaleDateString(
+                          "es-ES",
+                          { year: "numeric", month: "long", day: "numeric" },
+                        )}
+                        por OscarSpaceNG 
+                      </span>
                   </div>
-                </article>
+                </a>
               ))}
             </div>
           )
         }
       </div>
-      
-
       <aside class="home-sidebar">
-        <div class="sidebar-card">
-          <h3>Últimos artículos</h3>
-          <div class="sidebar-list">
-            {
-              recentPosts?.slice(0, 4).map((post) => (
-                <a class="sidebar-link" href={`/posts/${post.slug}`}>
-                  <strong>{post.title}</strong>
-                  <span>
-                    {new Date(post.published_at).toLocaleDateString("es-ES", {
-                      day: "numeric",
-                      month: "short",
-                    })}
-                  </span>
-                </a>
-              ))
-            }
-          </div>
-        </div>
-                <div class="sidebar-card sidebar-card--social">
-          <h3>Contenido social destacado</h3>
-
+        <div class="sidebar-card sidebar-card--social">
           {socialError && (
             <div class="notification notification--error">
               <strong>Error:</strong> {socialError}
@@ -216,23 +180,22 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
           {/* ── X ── */}
           {socialByPlatform.x.length > 0 && (
             <div class="social-section" id="sc-x-section">
+              <div class="topRedes">
+              <p class="colorWhite">OSCARSPACENG</p>
               <p class="social-section__label">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="#fff" aria-hidden="true">
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.748l7.73-8.835L1.254 2.25H8.08l4.262 5.636 5.902-5.636zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                 </svg>
-                X
               </p>
+              </div>
               <div class="x-snap" id="x-snap">
                 {socialByPlatform.x.map((item: SocialMediaItem) => (
                   <div class="x-snap__item">
                     <div class="x-snap__embed">
-                      <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none" data-theme="light">
+                      <blockquote class="twitter-tweet" data-dnt="true" data-conversation="none" data-theme="dark">
                         <a href={item.url}></a>
                       </blockquote>
                     </div>
-                    <a class="x-snap__readmore" href={item.url} target="_blank" rel="noopener noreferrer">
-                      Leer en X →
-                    </a>
                   </div>
                 ))}
               </div>
@@ -288,12 +251,15 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
           {/* ── YouTube ── */}
           {socialByPlatform.youtube.length > 0 && (
             <div class="social-section">
+               <div class="topRedes">
+              <p class="colorWhite">OSCARSPACENG</p>
               <p class="social-section__label">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="13" aria-hidden="true">
-                  <path fill="#FF0000" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="30" height="20" aria-hidden="true">
+                  <path fill="#ffff" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
                 </svg>
-                YouTube
               </p>
+              </div>
+              
               <div class="sc" id="sc-yt">
                 <div class="sc__track" id="sc-yt-track">
                   {socialByPlatform.youtube.map((item: SocialMediaItem, i: number) => (
@@ -306,7 +272,6 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
                         {item.title && item.title !== 'Ver contenido' && (
                           <p class="sc-card__title">{item.title}</p>
                         )}
-                        <span class="sc-card__link">Ver en YouTube →</span>
                       </a>
                     </div>
                   ))}
@@ -329,19 +294,21 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
           {/* ── Instagram ── */}
           {socialByPlatform.instagram.length > 0 && (
             <div class="social-section">
+              <div class="topRedes">
+              <p class="colorWhite">OSCARSPACENG</p>
               <p class="social-section__label">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                   <defs>
                     <linearGradient id="ig-lbl" x1="0%" y1="100%" x2="100%" y2="0%">
-                      <stop offset="0%" style="stop-color:#f09433"/>
-                      <stop offset="50%" style="stop-color:#dc2743"/>
-                      <stop offset="100%" style="stop-color:#bc1888"/>
+                      <stop offset="0%" style="stop-color:#ffff"/>
+                      <stop offset="50%" style="stop-color:#ffff"/>
+                      <stop offset="100%" style="stop-color:#fff"/>
                     </linearGradient>
                   </defs>
                   <path fill="url(#ig-lbl)" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
                 </svg>
-                Instagram
               </p>
+              </div>
               {socialByPlatform.instagram.map((item: SocialMediaItem) => (
                 <a class="sc-card sc-card--ig" href={item.url} target="_blank" rel="noopener noreferrer">
                   <svg class="sc-card--ig__icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
@@ -400,52 +367,10 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
             })();
           </script>
         </div>
-
-        <div class="sidebar-card sidebar-card--cta">
-          <h3>Sigue al autor</h3>
-          <p>Mantente conectado en nuestras redes sociales.</p>
-          <div class="social-links">
-            <a
-              href="https://twitter.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="social-link"
-              title="Twitter"
-            >
-              𝕏
-            </a>
-            <a
-              href="https://youtube.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="social-link"
-              title="YouTube"
-            >
-              ▶
-            </a>
-            <a
-              href="https://instagram.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="social-link"
-              title="Instagram"
-            >
-              📷
-            </a>
-            <a
-              href="https://discord.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="social-link"
-              title="Discord"
-            >
-              💬
-            </a>
-          </div>
-        </div>
       </aside>
     </section>
   </div>
+
 {socialByPlatform.x.length > 0 && (
   <script is:inline async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 )}

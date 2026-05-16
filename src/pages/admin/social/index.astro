@@ -114,6 +114,10 @@ const platforms = [
         align-items: center;
         margin-bottom: 0.5rem;
       }
+
+      .input-redes{
+        width: 100%;
+      }
       .url-row input {
         flex: 1;
       }
@@ -253,7 +257,7 @@ const platforms = [
         const row = document.createElement('div');
         row.className = 'url-row';
         row.innerHTML = `
-          <input type="url" name="${name}" placeholder="${placeholder}" required class="form-input" />
+          <input type="url" name="${name}" placeholder="${placeholder}" required class="form-input input-redes" />
           <button type="button" class="danger-button remove-btn">Eliminar</button>
         `;
         container.appendChild(row);

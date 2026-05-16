@@ -1,7 +1,7 @@
 import { z } from 'zod'
 
 export const postStatusSchema = z.enum(['draft', 'published', 'archived'])
-export const postTypeSchema = z.enum(['blog', 'news', 'tip'])
+export const postTypeSchema = z.enum(['blog', 'news', 'tip', 'japon', 'cultura-otaku', 'anime', 'manga'])
 
 export const postFormSchema = z
   .object({

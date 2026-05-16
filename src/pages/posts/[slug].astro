@@ -1,7 +1,7 @@
 ---
 export const prerender = false;
 
-import PublicLayout from '../../layouts/PublicLayout.astro';
+import PublicLayout from "../../layouts/PublicLayout.astro";
 import { createSupabaseClient } from "../../lib/supabase";
 import "../../styles/global.css";
 
@@ -9,29 +9,30 @@ const supabase = createSupabaseClient();
 const slug = Astro.params.slug;
 
 if (!slug) {
-    return Astro.redirect("/posts");
+  return Astro.redirect("/posts");
 }
 
 const { data: post, error } = await supabase
-    .from("posts")
-    .select(
-        "id, title, slug, excerpt, cover_image_path, content_html, post_type, published_at, status",
-    )
-    .eq("slug", slug)
-    .eq("status", "published")
-    .maybeSingle();
+  .from("posts")
+  .select(
+    "id, title, slug, excerpt, cover_image_path, content_html, post_type, published_at, status",
+  )
+  .eq("slug", slug)
+  .eq("status", "published")
+  .maybeSingle();
 
 if (error || !post) {
-    return Astro.redirect("/posts");
+  return Astro.redirect("/posts");
 }
 
 const imageUrl = post.cover_image_path
-    ? supabase.storage.from("post-images").getPublicUrl(post.cover_image_path).data.publicUrl
-    : null;
+  ? supabase.storage.from("post-images").getPublicUrl(post.cover_image_path)
+      .data.publicUrl
+  : null;
 ---
 
 <PublicLayout title={`${post.title} | SpaceGeek`}>
-  <main class="dashboard post-page">
+  <main class="dashboard post-page cardPost" style="padding: 0;">
     <nav class="breadcrumb">
       <a href="/">Inicio</a>
       <span>›</span>
@@ -40,31 +41,41 @@ const imageUrl = post.cover_image_path
       <span>{post.title}</span>
     </nav>
 
-    <article class="content-card post-detail">
-      <div class="post-detail__hero">
-        <div>
-          <p class="eyebrow">Publicación</p>
-          <h1>{post.title}</h1>
-          <div class="post-meta">
-            <span class="tag-pill">{post.post_type}</span>
-            {post.published_at && (
-              <span>{new Date(post.published_at).toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
-            )}
-          </div>
+    <article class="post-detail">
+      <div>
+        <p class="eyebrow">Publicación</p>
+        <h1>{post.title}</h1>
+        <div class="post-meta">
+          <span class="tag-pill">{post.post_type}</span>
+          {
+            post.published_at && (
+              <span>
+                {new Date(post.published_at).toLocaleDateString("es-ES", {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </span>
+            )
+          }
         </div>
-
-        {imageUrl && (
-          <img class="post-detail__image" src={imageUrl} alt={`Imagen de {post.title}`} />
-        )}
       </div>
+      <div>
+        {
+          imageUrl && (
+            <img
+              class="post-detail__image"
+              src={imageUrl}
+              alt={`Imagen de {post.title}`}
+            />
+          )
+        }
+        {post.excerpt && <p class="post-detail__excerpt">{post.excerpt}</p>}
 
-      {post.excerpt && (
-        <p class="post-detail__excerpt">{post.excerpt}</p>
-      )}
+        <hr class="section-divider" />
 
-      <hr class="section-divider" />
-
-      <div class="post-detail__content" set:html={post.content_html} />
+        <div class="post-detail__content" set:html={post.content_html} />
+      </div>
     </article>
   </main>
 </PublicLayout>

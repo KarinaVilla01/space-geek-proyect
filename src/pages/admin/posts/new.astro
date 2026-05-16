@@ -150,6 +150,17 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
               </div>
 
               <div class="form-group form-group--full">
+                <label for="cover_image">Banner / imagen destacada</label>
+                <input
+                  id="cover_image"
+                  name="cover_image"
+                  type="file"
+                  accept="image/*"
+                  class="form-file"
+                />
+              </div>
+
+              <div class="form-group form-group--full">
                 <label for="content_html">Contenido</label>
                 <textarea
                   id="content_html"
@@ -162,14 +173,13 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
               <div class="form-group">
                 <label for="post_type">Tipo</label>
                 <select id="post_type" name="post_type" class="form-select">
-                  <option value="blog" selected={post_type === "blog"}
-                    >blog</option
-                  >
-                  <option value="news" selected={post_type === "news"}
-                    >news</option
-                  >
-                  <option value="tip" selected={post_type === "tip"}>tip</option
-                  >
+                  <option value="blog" selected={post_type === "blog"}>blog</option>
+                  <option value="news" selected={post_type === "news"}>news</option>
+                  <option value="tip" selected={post_type === "tip"}>tip</option>
+                  <option value="japon" selected={post_type === "japon"}>Japón</option>
+                  <option value="cultura-otaku" selected={post_type === "cultura-otaku"}>Cultura Otaku</option>
+                  <option value="anime" selected={post_type === "anime"}>Anime</option>
+                  <option value="manga" selected={post_type === "manga"}>Manga</option>
                 </select>
               </div>
 
@@ -187,17 +197,6 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
                   >
                 </select>
               </div>
-
-              <div class="form-group form-group--full">
-                <label for="cover_image">Banner / imagen destacada</label>
-                <input
-                  id="cover_image"
-                  name="cover_image"
-                  type="file"
-                  accept="image/*"
-                  class="form-file"
-                />
-              </div>
             </div>
 
             <br />
@@ -209,7 +208,34 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
           </form>
 
           <script>
+            import azonixUrl from '../../../assets/font/Azonix.otf?url';
+
             window.addEventListener("DOMContentLoaded", () => {
+              const titleInput = document.getElementById("title");
+              const slugInput = document.getElementById("slug");
+              let userEditedSlug = slugInput.value !== "";
+
+              function toSlug(text) {
+                return text
+                  .toLowerCase()
+                  .normalize("NFD")
+                  .replace(/[̀-ͯ]/g, "")
+                  .replace(/[^a-z0-9\s-]/g, "")
+                  .trim()
+                  .replace(/\s+/g, "-")
+                  .replace(/-+/g, "-");
+              }
+
+              titleInput?.addEventListener("input", () => {
+                if (!userEditedSlug) {
+                  slugInput.value = toSlug(titleInput.value);
+                }
+              });
+
+              slugInput?.addEventListener("input", () => {
+                userEditedSlug = true;
+              });
+
               if (!window.tinymce) return;
 
               window.tinymce.init({
@@ -217,9 +243,21 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
                 menubar: false,
                 plugins: "link lists code table fontsize",
                 toolbar:
-                  "undo redo | blocks fontsize | bold italic underline | bullist numlist | link table | code",
+                  "undo redo | blocks fontsize fontfamily | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist | link table | code",
                 height: 420,
-                fontsize_formats: "8pt 10pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt 36pt 48pt 72pt"
+                fontsize_formats:
+                  "8pt 10pt 12pt 14pt 16pt 18pt 20pt 24pt 28pt 32pt 36pt 48pt 72pt",
+                font_family_formats:
+                  "Azonix=Azonix,sans-serif; Arial=arial,helvetica,sans-serif; Georgia=georgia,palatino,serif; Verdana=verdana,geneva,sans-serif; Courier New=courier new,courier,monospace; Times New Roman=times new roman,times,serif",
+                content_style: `
+                  @font-face {
+                    font-family: 'Azonix';
+                    src: url('${azonixUrl}') format('opentype');
+                    font-weight: normal;
+                    font-style: normal;
+                  }
+                  body { font-family: Inter, sans-serif; }
+                `,
               });
 
               const form = document.getElementById("post-form");
