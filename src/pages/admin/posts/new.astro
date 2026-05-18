@@ -11,7 +11,7 @@ const accessToken = Astro.cookies.get("sb-access-token");
 const refreshToken = Astro.cookies.get("sb-refresh-token");
 
 if (!accessToken || !refreshToken) {
-  return Astro.redirect("/admin/login");
+  return Astro.redirect("/admin/loginOscarUnique");
 }
 
 let sessionResult;
@@ -25,12 +25,12 @@ try {
   if (sessionResult.error || !sessionResult.data.user) {
     Astro.cookies.delete("sb-access-token", { path: "/" });
     Astro.cookies.delete("sb-refresh-token", { path: "/" });
-    return Astro.redirect("/admin/login");
+    return Astro.redirect("/admin/loginOscarUnique");
   }
 } catch {
   Astro.cookies.delete("sb-access-token", { path: "/" });
   Astro.cookies.delete("sb-refresh-token", { path: "/" });
-  return Astro.redirect("/admin/login");
+  return Astro.redirect("/admin/loginOscarUnique");
 }
 
 const user = sessionResult.data.user;
@@ -44,7 +44,7 @@ const { data: adminUser } = await supabase
 if (!adminUser || adminUser.role !== "admin" || adminUser.is_active !== true) {
   Astro.cookies.delete("sb-access-token", { path: "/" });
   Astro.cookies.delete("sb-refresh-token", { path: "/" });
-  return Astro.redirect("/admin/login?error=Not%20authorized");
+  return Astro.redirect("/admin/loginOscarUnique?error=Not%20authorized");
 }
 
 const error = Astro.url.searchParams.get("error");

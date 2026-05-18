@@ -154,7 +154,7 @@ Funciones:
 - `/posts/[slug]`
 
 ### Privadas
-- `/admin/login`
+- `/admin/loginOscarUnique`
 - `/admin`
 - `/admin/posts`
 - `/admin/posts/new`

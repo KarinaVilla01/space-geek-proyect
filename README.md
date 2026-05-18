@@ -146,7 +146,7 @@ Acceso restringido a usuarios registrados en la tabla `admin_users`.
 
 | Ruta | Descripción |
 |------|-------------|
-| `/admin/login` | Inicio de sesión |
+| `/admin/loginOscarUnique` | Inicio de sesión |
 | `/admin` | Dashboard principal |
 | `/admin/posts` | Listado de artículos (borradores, publicados, archivados) |
 | `/admin/posts/new` | Crear nuevo artículo |
@@ -172,13 +172,54 @@ Los enlaces guardados aparecen en el panel derecho de la página de inicio, agru
 
 En `wrangler.jsonc`, reemplaza el campo `name` con el nombre real de tu Worker en Cloudflare.
 
-### 2. Variables de entorno en producción
+### 2. Subir las migraciones a Supabase producción
 
-En el dashboard de Cloudflare, ve a **Workers & Pages → tu-worker → Settings → Variables** y agrega las mismas variables del `.env.local` (excepto las `PUBLIC_*`, que se inyectan en el build).
+```bash
+npx supabase login
+npx supabase link --project-ref <tu-project-ref>
+npx supabase db push
+```
 
-O bien, agrégalas directamente en `wrangler.jsonc` bajo `[vars]` para variables no sensibles.
+El `project-ref` se encuentra en Supabase → **Settings → General → Project ID**.
 
-### 3. Build y deploy
+### 3. Crear el usuario administrador en producción
+
+**Paso 1:** En Supabase → **Authentication → Users → Add user → Create new user**, crea el usuario con email y contraseña. Marca **"Auto Confirm User"**.
+
+**Paso 2:** Copia el UUID que aparece en Authentication → Users y ejecuta en el **SQL Editor**:
+
+```sql
+INSERT INTO admin_users (id, email, role, is_active)
+VALUES ('<UUID del usuario>', 'correo@ejemplo.com', 'admin', true);
+```
+
+### 4. Variables de entorno de producción
+
+Las variables `PUBLIC_*` se inyectan en el código **al momento del build**, por lo que deben estar disponibles antes de compilar. Crea un archivo `.env.production` (ya está en `.gitignore`) con los valores reales:
+
+```env
+PUBLIC_SUPABASE_URL=https://<tu-proyecto>.supabase.co
+PUBLIC_SUPABASE_ANON_KEY=<legacy anon key — empieza con eyJ...>
+SUPABASE_SERVICE_ROLE_KEY=<legacy service_role key — empieza con eyJ...>
+PUBLIC_TINYMCE_API_KEY=<api-key>
+PUBLIC_SITE_URL=https://<tu-worker>.workers.dev
+```
+
+> Las legacy keys se obtienen en Supabase → **Settings → API Keys → Legacy anon, service_role API keys**.
+
+### 5. Autenticarse en Cloudflare y hacer el primer deploy
+
+```bash
+npx wrangler login
+npm run build
+npx wrangler deploy
+```
+
+Al terminar, Cloudflare muestra la URL pública del Worker. Actualiza `PUBLIC_SITE_URL` en `.env.production` con esa URL y vuelve a hacer el deploy.
+
+### 6. Publicar cambios
+
+Cada vez que hagas cambios en el código y quieras publicarlos en producción:
 
 ```bash
 npm run build

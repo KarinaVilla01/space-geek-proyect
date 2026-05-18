@@ -39,7 +39,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const refreshToken = cookies.get('sb-refresh-token')
 
   if (!accessToken || !refreshToken) {
-    return redirect('/admin/login')
+    return redirect('/admin/loginOscarUnique')
   }
 
   const sessionResult = await supabase.auth.setSession({
@@ -50,7 +50,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   if (sessionResult.error || !sessionResult.data.user) {
     cookies.delete('sb-access-token', { path: '/' })
     cookies.delete('sb-refresh-token', { path: '/' })
-    return redirect('/admin/login')
+    return redirect('/admin/loginOscarUnique')
   }
 
   const user = sessionResult.data.user
@@ -62,7 +62,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
     .maybeSingle()
 
   if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
-    return redirect('/admin/login?error=Not%20authorized')
+    return redirect('/admin/loginOscarUnique?error=Not%20authorized')
   }
 
   const { count: currentCount } = await supabaseAdmin

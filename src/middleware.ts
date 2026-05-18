@@ -4,7 +4,7 @@ import { createSupabaseClient } from './lib/supabase'
 export const onRequest: MiddlewareHandler = async (context, next) => {
   const pathname = context.url.pathname
   const isAdminRoute = pathname.startsWith('/admin')
-  const isLoginRoute = pathname === '/admin/login'
+  const isLoginRoute = pathname === '/admin/loginOscarUnique'
 
   if (!isAdminRoute) {
     return next()
@@ -16,7 +16,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   // No hay cookies → solo permitir la página de login
   if (!accessToken?.value || !refreshToken?.value) {
     if (isLoginRoute) return next()
-    return context.redirect('/admin/login')
+    return context.redirect('/admin/loginOscarUnique')
   }
 
   // Validar sesión con Supabase
@@ -30,7 +30,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
     context.cookies.delete('sb-access-token', { path: '/' })
     context.cookies.delete('sb-refresh-token', { path: '/' })
     if (isLoginRoute) return next()
-    return context.redirect('/admin/login')
+    return context.redirect('/admin/loginOscarUnique')
   }
 
   // Verificar que el usuario está en admin_users con rol activo
@@ -54,7 +54,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
   if (!isAuthorized) {
     context.cookies.delete('sb-access-token', { path: '/' })
     context.cookies.delete('sb-refresh-token', { path: '/' })
-    return context.redirect('/admin/login')
+    return context.redirect('/admin/loginOscarUnique')
   }
 
   return next()

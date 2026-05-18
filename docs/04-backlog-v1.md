@@ -117,7 +117,7 @@ La aplicación debe poder consultar e interactuar con la base local desde Astro.
 ## Fase 4 - Autenticación del administrador
 
 ### 4.1 Flujo de login
-- [x] Crear ruta `/admin/login`
+- [x] Crear ruta `/admin/loginOscarUnique`
 - [x] Implementar formulario de login
 - [x] Integrar autenticación con Supabase Auth
 - [x] Validar acceso con cuenta administrativa

@@ -9,7 +9,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   const password = formData.get('password')?.toString()
 
   if (!email || !password) {
-    return redirect('/admin/login?error=Missing%20credentials')
+    return redirect('/admin/loginOscarUnique?error=Missing%20credentials')
   }
 
   const supabase = createSupabaseClient()
@@ -22,7 +22,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
   if (error || !data.session || !data.user) {
     const isDev = import.meta.env.DEV
     const msg = isDev && error ? `[DEV] ${error.message}` : 'Credenciales incorrectas'
-    return redirect(`/admin/login?error=${encodeURIComponent(msg)}`)
+    return redirect(`/admin/loginOscarUnique?error=${encodeURIComponent(msg)}`)
   }
 
   const { access_token, refresh_token } = data.session
