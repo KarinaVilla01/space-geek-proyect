@@ -1,3 +1,7 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 :root {
     color-scheme: dark;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -299,7 +303,7 @@ p {
 .lineRed {
     background-color: #ff3527;
     height: 100px;
-    width: 200%;
+    width: 100%;
 }
 
 .tag-pill {
@@ -335,13 +339,13 @@ p {
 }
 
 .post-page {
-    width: min(1024px, 100%);
+    width: min(1300px, 100%);
     min-height: auto;
     display: grid;
     gap: 1.75rem;
 }
 
-.cardPost .post-detail{
+.cardPost .post-detail {
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
 }
@@ -437,7 +441,7 @@ p {
 }
 
 .posts-page {
-    width: min(1120px, 100%);
+    width: min(1300px, 100%);
     min-height: auto;
     display: grid;
     gap: 2rem;
@@ -796,6 +800,11 @@ p {
     .home-grid {
         grid-template-columns: 1fr;
     }
+
+    .lineRed {
+        width: 100%;
+        height: 50px;
+    }
 }
 
 @media (max-width: 680px) {
@@ -811,7 +820,52 @@ p {
     .actions--row {
         display: grid;
     }
+
+    .dashboard {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .home-page {
+        max-width: 100%;
+        border-radius: 0;
+    }
+
+    .footer-container {
+        width: 100%;
+        margin-bottom: 0;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    .hero--posts .hero__text {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .lineRed {
+        width: 100%;
+        height: 50px;
+    }
+
+    .main-content {
+        padding: 10px 0px 0 0;
+    }
+
+    .post-list a.post-card {
+        margin-left: 0;
+    }
+
+    .post-card {
+        flex-direction: column;
+    }
+
+    .post-card__image {
+        width: 100%;
+        height: 200px;
+    }
 }
+
 
 .card:hover {
     transform: translateY(-4px);
@@ -865,6 +919,28 @@ p {
 
     .logout-button {
         width: 100%;
+    }
+
+    .lineRed {
+        width: 100%;
+        height: 50px;
+    }
+
+    .home-page {
+        max-width: 100%;
+    }
+
+    .post-list a.post-card {
+        margin-left: 0;
+    }
+
+    .post-card {
+        flex-direction: column;
+    }
+
+    .post-card__image {
+        width: 100%;
+        height: 200px;
     }
 }
 
@@ -920,6 +996,12 @@ p {
     color: #c7d2fe;
 }
 
+.notification--success {
+    border-color: rgba(34, 197, 94, 0.24);
+    background: rgba(34, 197, 94, 0.08);
+    color: #166534;
+}
+
 .table-wrapper {
     overflow-x: auto;
     border-radius: 24px;
@@ -971,6 +1053,20 @@ p {
 .table-link:hover {
     background: rgba(56, 189, 248, 0.18);
     transform: translateY(-1px);
+}
+
+.table-link--danger {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+.table-link--danger:hover {
+    background: rgba(239, 68, 68, 0.2);
+    color: #dc2626;
 }
 
 .actions--row {
@@ -1234,6 +1330,7 @@ p {
     border-radius: 50%;
     border: 1px solid rgba(30, 82, 223, 0.12);
     color: #0f172a;
+    background-color: white;
     font-size: 1.1rem;
     line-height: 1;
     cursor: pointer;
@@ -1272,14 +1369,14 @@ p {
     color: #fff;
 }
 
-.topRedes{
+.topRedes {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
 }
 
-.topRedes p{
+.topRedes p {
     margin-top: 0;
     font-weight: 800;
 }
@@ -1291,7 +1388,6 @@ p {
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    border-radius: 12px;
 }
 
 .x-snap::-webkit-scrollbar {
@@ -1302,7 +1398,6 @@ p {
     min-width: 100%;
     scroll-snap-align: start;
     flex-shrink: 0;
-    border-radius: 12px;
     overflow: hidden;
 }
 
@@ -1319,7 +1414,7 @@ p {
     left: 0;
     right: 0;
     height: 56px;
-    background: linear-gradient(to bottom, transparent, #fff);
+    background: linear-gradient(to bottom, transparent, #000);
     pointer-events: none;
 }
 
@@ -1426,7 +1521,7 @@ p {
     line-height: 1.4;
     overflow: hidden;
     background-color: #0a0a4a;
-    color:#ffff;
+    color: #ffff;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;

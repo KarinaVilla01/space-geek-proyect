@@ -24,13 +24,35 @@ import "../styles/public-layout.css";
             <img src="/Logo.png" alt="SpaceGeek" class="header-image" />
           </a>
         </div>
-        <nav class="header-nav">
+        <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+        <nav class="header-nav" id="header-nav">
           <a href="/" class="nav-link">Inicio</a>
           <a href="/posts" class="nav-link">Publicaciones</a>
           <a href="/about" class="nav-link">Acerca de</a>
         </nav>
       </div>
     </header>
+
+    <script>
+      const hamburger = document.getElementById('hamburger');
+      const nav = document.getElementById('header-nav');
+      hamburger?.addEventListener('click', () => {
+        const open = nav?.classList.toggle('header-nav--open');
+        hamburger.setAttribute('aria-expanded', String(open));
+        hamburger.classList.toggle('hamburger--open', open);
+      });
+      nav?.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          nav.classList.remove('header-nav--open');
+          hamburger?.classList.remove('hamburger--open');
+          hamburger?.setAttribute('aria-expanded', 'false');
+        });
+      });
+    </script>
 
     <main class="main-content">
       <slot />
@@ -41,7 +63,7 @@ import "../styles/public-layout.css";
       <div class="footer-container">
         <div class="footer-content">
           <div class="footer-section podcast">
-            <img src="./PODCASILLO.png" alt="">
+            <img src="/PODCASILLO.png" alt="">
             <p>Noticias, artículos y análisis para fans de la cultura geek.</p>
           </div>
           <div class="footer-section">

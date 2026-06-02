@@ -50,6 +50,9 @@ const { data: posts, error } = await supabase
   .from('posts')
   .select('id, title, slug, status, post_type, created_at, published_at')
   .order('created_at', { ascending: false })
+
+const successMsg = Astro.url.searchParams.get('success')
+const errorMsg = Astro.url.searchParams.get('error')
 ---
 
 <html lang="es">
@@ -57,6 +60,7 @@ const { data: posts, error } = await supabase
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Posts</title>
+    <link rel="icon" type="image/x-icon" href="/Logo.png" />
   </head>
   <body>
     <main>
@@ -76,6 +80,14 @@ const { data: posts, error } = await supabase
         </section>
 
         <section class="content-card">
+
+          {successMsg && (
+            <div class="notification notification--success">{successMsg}</div>
+          )}
+
+          {errorMsg && (
+            <div class="notification notification--error"><strong>Error:</strong> {errorMsg}</div>
+          )}
 
           {error && (
             <div class="notification notification--error">
@@ -111,8 +123,12 @@ const { data: posts, error } = await supabase
                       <td>{post.slug}</td>
                       <td>{new Date(post.created_at).toLocaleString()}</td>
                       <td>{post.published_at ? new Date(post.published_at).toLocaleString() : '-'}</td>
-                      <td>
+                      <td class="actions--row">
                         <a class="table-link" href={`/admin/posts/${post.id}/edit`}>Editar</a>
+                        <form method="post" action="/api/admin/posts/delete" onsubmit="return confirm('¿Eliminar esta publicación? Esta acción no se puede deshacer.')">
+                          <input type="hidden" name="id" value={post.id} />
+                          <button type="submit" class="table-link table-link--danger">Eliminar</button>
+                        </form>
                       </td>
                     </tr>
                   ))}

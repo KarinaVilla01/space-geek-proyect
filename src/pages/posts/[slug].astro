@@ -3,6 +3,7 @@ export const prerender = false;
 
 import PublicLayout from "../../layouts/PublicLayout.astro";
 import { createSupabaseClient } from "../../lib/supabase";
+import { supabaseAdmin } from "../../lib/supabase/server";
 import "../../styles/global.css";
 
 const supabase = createSupabaseClient();
@@ -12,7 +13,7 @@ if (!slug) {
   return Astro.redirect("/posts");
 }
 
-const { data: post, error } = await supabase
+const { data: post, error } = await supabaseAdmin
   .from("posts")
   .select(
     "id, title, slug, excerpt, cover_image_path, content_html, post_type, published_at, status",

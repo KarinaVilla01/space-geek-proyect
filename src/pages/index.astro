@@ -1,4 +1,6 @@
 ---
+export const prerender = false
+
 import PublicLayout from "../layouts/PublicLayout.astro";
 import { createSupabaseClient } from "../lib/supabase";
 import { supabaseAdmin } from "../lib/supabase/server";
@@ -7,7 +9,7 @@ import "../styles/global.css";
 
 const supabase = createSupabaseClient();
 
-const { data: recentPosts, error } = await supabase
+const { data: recentPosts, error } = await supabaseAdmin
   .from("posts")
   .select("id, title, slug, excerpt, cover_image_path, post_type, published_at")
   .eq("status", "published")
