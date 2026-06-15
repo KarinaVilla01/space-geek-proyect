@@ -1,10 +1,18 @@
 ---
+export const prerender = false;
+
 export interface Props {
   title: string;
 }
 
 const { title } = Astro.props;
 import "../styles/public-layout.css";
+import { supabaseAdmin } from "../lib/supabase/server";
+
+const { data: navSections } = await supabaseAdmin
+  .from("post_sections")
+  .select("slug, label")
+  .order("sort_order", { ascending: true });
 ---
 
 <html lang="es">
@@ -19,9 +27,7 @@ import "../styles/public-layout.css";
       <div class="header-container">
         <div class="header-logo">
           <a href="/" class="logo-link">
-            <h5 class="header-title">Spacenoid</h5>
-            <h4 class="header-title redLetter">Geek</h4>
-            <img src="/Logo.png" alt="SpaceGeek" class="header-image" />
+            <img src="/SpaceNoidGeek_Logo.png" alt="SpaceGeek" class="header-image" />
           </a>
         </div>
         <button class="hamburger" id="hamburger" aria-label="Abrir menú" aria-expanded="false">
@@ -31,7 +37,20 @@ import "../styles/public-layout.css";
         </button>
         <nav class="header-nav" id="header-nav">
           <a href="/" class="nav-link">Inicio</a>
-          <a href="/posts" class="nav-link">Publicaciones</a>
+          <div class="nav-dropdown" id="pub-dropdown">
+            <button class="nav-link nav-dropdown__toggle" aria-expanded="false" aria-haspopup="listbox">
+              Publicaciones
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true" class="nav-dropdown__chevron">
+                <path d="M2 4l4 4 4-4"/>
+              </svg>
+            </button>
+            <ul class="nav-dropdown__menu" role="listbox">
+              <li><a href="/posts" class="nav-dropdown__item">Todas las secciones</a></li>
+              {(navSections ?? []).map((s) => (
+                <li><a href={`/posts?type=${s.slug}`} class="nav-dropdown__item">{s.label}</a></li>
+              ))}
+            </ul>
+          </div>
           <a href="/about" class="nav-link">Acerca de</a>
         </nav>
       </div>
@@ -40,17 +59,47 @@ import "../styles/public-layout.css";
     <script>
       const hamburger = document.getElementById('hamburger');
       const nav = document.getElementById('header-nav');
+      const dropdown = document.getElementById('pub-dropdown');
+      const toggle = dropdown?.querySelector('.nav-dropdown__toggle') as HTMLButtonElement | null;
+
+      function closeDropdown() {
+        toggle?.setAttribute('aria-expanded', 'false');
+        dropdown?.classList.remove('nav-dropdown--open');
+      }
+
+      function closeMobileNav() {
+        nav?.classList.remove('header-nav--open');
+        hamburger?.classList.remove('hamburger--open');
+        hamburger?.setAttribute('aria-expanded', 'false');
+      }
+
       hamburger?.addEventListener('click', () => {
         const open = nav?.classList.toggle('header-nav--open');
         hamburger.setAttribute('aria-expanded', String(open));
         hamburger.classList.toggle('hamburger--open', open);
+        if (!open) closeDropdown();
       });
-      nav?.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', () => {
-          nav.classList.remove('header-nav--open');
-          hamburger?.classList.remove('hamburger--open');
-          hamburger?.setAttribute('aria-expanded', 'false');
+
+      toggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const expanded = toggle.getAttribute('aria-expanded') === 'true';
+        toggle.setAttribute('aria-expanded', String(!expanded));
+        dropdown?.classList.toggle('nav-dropdown--open', !expanded);
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!dropdown?.contains(e.target as Node)) closeDropdown();
+      });
+
+      dropdown?.querySelectorAll('.nav-dropdown__item').forEach((item) => {
+        item.addEventListener('click', () => {
+          closeDropdown();
+          closeMobileNav();
         });
+      });
+
+      nav?.querySelectorAll('.nav-link:not(.nav-dropdown__toggle)').forEach((link) => {
+        link.addEventListener('click', () => closeMobileNav());
       });
     </script>
 
@@ -59,12 +108,15 @@ import "../styles/public-layout.css";
     </main>
 
     <footer class="site-footer">
-        <div class="lineRed"></div>
+        <div class="lineRed">
+          <img src="/Your_Space.png" alt="Your Space" class="lineRedImage">
+        </div>
       <div class="footer-container">
         <div class="footer-content">
-          <div class="footer-section podcast">
-            <img src="/PODCASILLO.png" alt="">
-            <p>Noticias, artículos y análisis para fans de la cultura geek.</p>
+          <div class="footer-section karinSpace">
+            <img src="/Karin.png" alt="Karina Villa">
+            <p>Diseñado y desarrollado por Karina Villa Developer</p>
+            <p class="footer-credit">Cualquier información de contacto click aquí -> <a href="https://www.instagram.com/karin.sak01/" target="_blank" rel="noopener noreferrer">Karina Villa</a></p>
           </div>
           <div class="footer-section">
             <h4>Enlaces</h4>
@@ -79,7 +131,7 @@ import "../styles/public-layout.css";
             <h4>Conectar</h4>
             <div class="social-links">
               <a
-                href="https://twitter.com"
+                href="https://x.com/OscarSpaceNG"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="X (Twitter)"
@@ -89,7 +141,7 @@ import "../styles/public-layout.css";
                 </svg>
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@oscarspaceng"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="YouTube"
@@ -99,7 +151,7 @@ import "../styles/public-layout.css";
                 </svg>
               </a>
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/oscarspaceng/"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Instagram"
@@ -109,7 +161,7 @@ import "../styles/public-layout.css";
                 </svg>
               </a>
               <a
-                href="https://discord.com"
+                href="https://discord.gg/WvvCr3TeRu"
                 target="_blank"
                 rel="noopener noreferrer"
                 title="Discord"
@@ -123,7 +175,6 @@ import "../styles/public-layout.css";
         </div>
         <div class="footer-bottom">
           <p>&copy; 2026 SpaceGeek. Todos los derechos reservados.</p>
-          <p class="footer-credit">Diseñado y desarrollado por <a href="https://www.instagram.com/karin.sak01/" target="_blank" rel="noopener noreferrer">KarinSak</a></p>
         </div>
       </div>
     </footer>

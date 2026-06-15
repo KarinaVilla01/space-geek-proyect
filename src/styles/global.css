@@ -1,4 +1,6 @@
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
@@ -28,6 +30,7 @@ main {
 
 .hero {
     display: grid;
+    width: 100%;
     gap: 1.5rem;
     padding: 2rem;
     border-radius: 32px;
@@ -43,13 +46,9 @@ main {
     gap: 1rem;
 }
 
-.hero__text {
-    max-width: 720px;
-}
-
 .hero__imgs {
     display: flex;
-    padding: 5px;
+    padding: 5px 5px 0 5px;
     gap: 5px;
 }
 
@@ -155,7 +154,7 @@ p {
 
 .cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
     gap: 1.5rem;
 }
 
@@ -171,12 +170,15 @@ p {
 .home-page {
     display: flex;
     flex-direction: column;
-    gap: 2rem;
+    gap: 0;
     border-top-left-radius: 36px;
     border-top-right-radius: 36px;
     max-width: 85%;
     background-color: #f8fafc;
-    padding-bottom: 5px;
+}
+
+.podcastSection {
+    background-color: #f8fafc;
 }
 
 .hero--home {
@@ -230,7 +232,7 @@ p {
     display: grid;
     margin: 0 5px;
     grid-template-columns: minmax(0, 2.4fr) minmax(280px, 1fr);
-    gap: 2rem;
+    gap: 0.5rem;
 }
 
 .section-header {
@@ -304,6 +306,9 @@ p {
     background-color: #ff3527;
     height: 100px;
     width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .tag-pill {
@@ -713,7 +718,12 @@ p {
     padding: 1.75rem;
     border-radius: 28px;
     display: grid;
-    gap: 1rem;
+    gap: 0.5rem;
+}
+
+.discord-link {
+    max-height: 209px;
+    display: block;
 }
 
 .sidebar-card--cta {
@@ -905,7 +915,6 @@ p {
 .note {
     padding: 1.5rem 1.75rem;
     margin-top: 0;
-    border-radius: 28px;
     background: rgba(255, 255, 255);
     border: 1px solid rgba(30, 82, 223, 0.06);
     color: #94a3b8;
@@ -1270,17 +1279,45 @@ p {
     }
 }
 
+.discordSection a {
+    background-color: #0a0a4a;
+}
+
+.discordSection img {
+    width: 100%;
+}
+
+.lineRedImage {
+    height: 100px;
+}
+
+.podcast-link{
+    height: 2rem;
+}
+
+.podcast-link img,
+.hero__space {
+    width: 100%;
+}
+
+.karinSpace img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    object-position: 0 -105px;
+}
+
 /* ── Contenido social destacado ─────────────────────────── */
 .sidebar-card--social {
     padding: 0;
     display: grid;
-    gap: 0.9rem;
 }
 
 .social-section {
     display: grid;
     gap: 0.4rem;
     background-color: #0a0a4a;
+    padding: 15px 0;
 }
 
 .social-section__label {
@@ -1340,6 +1377,7 @@ p {
 
 .sc__btn:hover {
     background: rgba(59, 130, 246, 0.16);
+    color: white;
 }
 
 .sc__dots {
@@ -1405,6 +1443,10 @@ p {
     max-height: 260px;
     overflow: hidden;
     position: relative;
+    border-radius: 0;
+    background: #15202b;
+    isolation: isolate;
+    margin: 0 -10px;
 }
 
 .x-snap__embed::after {
@@ -1413,8 +1455,8 @@ p {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 56px;
-    background: linear-gradient(to bottom, transparent, #000);
+    height: 80px;
+    background: linear-gradient(to bottom, rgba(21, 32, 43, 0), #15202b);
     pointer-events: none;
 }
 
@@ -1580,4 +1622,28 @@ p {
     padding: 0;
     border: none;
     font-size: 0.7rem;
+}
+
+.filter-select-wrap {
+    margin-top: 1.25rem;
+    width: 100%;
+    display: flex;
+    justify-content: end;
+}
+
+.filter-select {
+    padding: 0.4rem 0.85rem;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+    color: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+.filter-select:hover,
+.filter-select:focus {
+    border-color: rgba(255, 255, 255, 0.5);
 }

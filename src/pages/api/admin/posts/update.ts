@@ -35,7 +35,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         .eq('id', user.id)
         .maybeSingle()
 
-    if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
+    if (!adminUser || !['admin', 'editor'].includes(adminUser.role) || adminUser.is_active !== true) {
         return redirect('/admin/loginOscarUnique?error=Not%20authorized')
     }
 
@@ -85,7 +85,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         )
     }
 
-    const { data: existingSlug } = await supabase
+    const { data: existingSlug } = await supabaseAdmin
         .from('posts')
         .select('id')
         .eq('slug', values.slug)
@@ -98,7 +98,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         )
     }
 
-    const { data: currentPost } = await supabase
+    const { data: currentPost } = await supabaseAdmin
         .from('posts')
         .select('published_at')
         .eq('id', id)
@@ -155,7 +155,7 @@ export const POST: APIRoute = async ({ request, cookies, redirect }) => {
         updateData.cover_image_path = coverImagePath
     }
 
-    const { error } = await supabase
+    const { error } = await supabaseAdmin
         .from('posts')
         .update(updateData)
         .eq('id', id)

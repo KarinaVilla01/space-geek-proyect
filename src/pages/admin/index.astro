@@ -36,15 +36,18 @@ const user = sessionResult.data.user
 
 const { data: adminUser } = await supabase
   .from('admin_users')
-  .select('id, role, is_active')
+  .select('id, role, is_active, display_name')
   .eq('id', user.id)
   .maybeSingle()
 
-if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
+if (!adminUser || !['admin', 'editor'].includes(adminUser.role) || adminUser.is_active !== true) {
   Astro.cookies.delete('sb-access-token', { path: '/' })
   Astro.cookies.delete('sb-refresh-token', { path: '/' })
   return Astro.redirect('/admin/loginOscarUnique?error=Not%20authorized')
 }
+
+const isAdmin = adminUser.role === 'admin'
+const displayName = adminUser.display_name || user.email
 ---
 
 <html lang="es">
@@ -61,7 +64,7 @@ if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
           <div class="hero__header">
             <div class="hero__text">
               <p class="eyebrow">Panel administrativo</p>
-              <h1>Bienvenida, {user.email}</h1>
+              <h1>Bienvenido, {displayName}</h1>
               <p>Gestiona tus publicaciones, crea contenido nuevo y controla tu admin desde un panel limpio, rápido y enfocado.</p>
             </div>
             <div class="actions">
@@ -90,6 +93,22 @@ if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
             <p>Agrega contenido manual para Instagram, X o YouTube y administra la fila social.</p>
             <a href="/admin/social">Administrar social</a>
           </article>
+
+          {isAdmin && (
+            <article class="card">
+              <h2>Secciones</h2>
+              <p>Agrega o elimina las secciones disponibles al crear y editar publicaciones.</p>
+              <a href="/admin/sections">Gestionar secciones</a>
+            </article>
+          )}
+
+          {isAdmin && (
+            <article class="card">
+              <h2>Gestionar usuarios</h2>
+              <p>Crea nuevos usuarios con rol admin o editor y administra el acceso al panel.</p>
+              <a href="/admin/users">Gestionar usuarios</a>
+            </article>
+          )}
         </section>
 
       </div>

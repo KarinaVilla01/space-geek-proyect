@@ -8,11 +8,34 @@ import "../../styles/global.css";
 
 const supabase = createSupabaseClient();
 
-const { data: posts, error } = await supabaseAdmin
+const activeType = Astro.url.searchParams.get("type") ?? "";
+
+let query = supabaseAdmin
   .from("posts")
-  .select("id, title, slug, excerpt, cover_image_path, post_type, published_at")
+  .select("id, title, slug, excerpt, cover_image_path, post_type, published_at, author:admin_users!author_id(display_name, email)")
   .eq("status", "published")
   .order("published_at", { ascending: false });
+
+if (activeType) {
+  query = query.eq("post_type", activeType);
+}
+
+const { data: posts, error } = await query;
+
+// Fetch sections that have at least one published post (for filter pills)
+const { data: allPublished } = await supabaseAdmin
+  .from("posts")
+  .select("post_type")
+  .eq("status", "published");
+
+const usedTypes = new Set((allPublished ?? []).map((p) => p.post_type));
+
+const { data: sections } = await supabaseAdmin
+  .from("post_sections")
+  .select("slug, label")
+  .order("sort_order", { ascending: true });
+
+const filterSections = (sections ?? []).filter((s) => usedTypes.has(s.slug));
 ---
 
 <PublicLayout title="Publicaciones | SpaceGeek">
@@ -25,6 +48,20 @@ const { data: posts, error } = await supabaseAdmin
           Lee las últimas noticias y artículos de SpaceGeek en un formato cómodo
           y visual.
         </p>
+        {filterSections.length > 0 && (
+          <div class="filter-select-wrap">
+            <select
+              id="type-filter"
+              class="filter-select"
+              onchange="location.href = this.value ? '/posts?type=' + this.value : '/posts'"
+            >
+              <option value="" selected={!activeType}>Todas las secciones</option>
+              {filterSections.map((s) => (
+                <option value={s.slug} selected={activeType === s.slug}>{s.label}</option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
       {
         error && (
@@ -65,7 +102,7 @@ const { data: posts, error } = await supabaseAdmin
                           "es-ES",
                           { year: "numeric", month: "short", day: "numeric" },
                         )}{" "}
-                        por OscarSpaceNG{" "}
+                        por {(post.author as any)?.display_name || (post.author as any)?.email?.split('@')[0] || 'SpaceGeek'}{" "}
                       </span>
                     )}
                   </div>
@@ -87,3 +124,4 @@ const { data: posts, error } = await supabaseAdmin
     </section>
   </main>
 </PublicLayout>
+

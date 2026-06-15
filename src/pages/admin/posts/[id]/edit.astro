@@ -41,7 +41,7 @@ const { data: adminUser } = await supabase
     .eq("id", user.id)
     .maybeSingle();
 
-if (!adminUser || adminUser.role !== "admin" || adminUser.is_active !== true) {
+if (!adminUser || !['admin', 'editor'].includes(adminUser.role) || adminUser.is_active !== true) {
     Astro.cookies.delete("sb-access-token", { path: "/" });
     Astro.cookies.delete("sb-refresh-token", { path: "/" });
     return Astro.redirect("/admin/loginOscarUnique?error=Not%20authorized");
@@ -81,6 +81,11 @@ const tinyApiKey = import.meta.env.PUBLIC_TINYMCE_API_KEY ?? "no-api-key";
 const currentImageUrl = post.cover_image_path
     ? supabase.storage.from("post-images").getPublicUrl(post.cover_image_path).data.publicUrl
     : null;
+
+const { data: sections } = await supabase
+    .from("post_sections")
+    .select("slug, label")
+    .order("sort_order", { ascending: true });
 ---
 
 <html lang="es">
@@ -214,13 +219,9 @@ const currentImageUrl = post.cover_image_path
                                     name="post_type"
                                     class="form-select"
                                 >
-                                    <option value="blog" selected={post_type === "blog"}>blog</option>
-                                    <option value="news" selected={post_type === "news"}>news</option>
-                                    <option value="tip" selected={post_type === "tip"}>tip</option>
-                                    <option value="japon" selected={post_type === "japon"}>Japón</option>
-                                    <option value="cultura-otaku" selected={post_type === "cultura-otaku"}>Cultura Otaku</option>
-                                    <option value="anime" selected={post_type === "anime"}>Anime</option>
-                                    <option value="manga" selected={post_type === "manga"}>Manga</option>
+                                    {(sections ?? []).map((s) => (
+                                        <option value={s.slug} selected={post_type === s.slug}>{s.label}</option>
+                                    ))}
                                 </select>
                             </div>
 

@@ -1,0 +1,217 @@
+---
+export const prerender = false
+
+import { createSupabaseClient } from '../../../lib/supabase'
+import { supabaseAdmin } from '../../../lib/supabase/server'
+import '../../../styles/global.css'
+
+const supabase = createSupabaseClient()
+
+const accessToken = Astro.cookies.get('sb-access-token')
+const refreshToken = Astro.cookies.get('sb-refresh-token')
+
+if (!accessToken || !refreshToken) {
+  return Astro.redirect('/admin/loginOscarUnique')
+}
+
+let sessionResult
+
+try {
+  sessionResult = await supabase.auth.setSession({
+    access_token: accessToken.value,
+    refresh_token: refreshToken.value,
+  })
+
+  if (sessionResult.error || !sessionResult.data.user) {
+    Astro.cookies.delete('sb-access-token', { path: '/' })
+    Astro.cookies.delete('sb-refresh-token', { path: '/' })
+    return Astro.redirect('/admin/loginOscarUnique')
+  }
+} catch {
+  Astro.cookies.delete('sb-access-token', { path: '/' })
+  Astro.cookies.delete('sb-refresh-token', { path: '/' })
+  return Astro.redirect('/admin/loginOscarUnique')
+}
+
+const user = sessionResult.data.user
+
+const { data: adminUser } = await supabase
+  .from('admin_users')
+  .select('id, role, is_active')
+  .eq('id', user.id)
+  .maybeSingle()
+
+if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
+  Astro.cookies.delete('sb-access-token', { path: '/' })
+  Astro.cookies.delete('sb-refresh-token', { path: '/' })
+  return Astro.redirect('/admin/loginOscarUnique?error=Not%20authorized')
+}
+
+const { data: users, error: usersError } = await supabaseAdmin
+  .from('admin_users')
+  .select('id, email, display_name, role, is_active, created_at')
+  .order('created_at', { ascending: false })
+
+const successMsg = Astro.url.searchParams.get('success')
+const errorMsg = Astro.url.searchParams.get('error')
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestionar usuarios</title>
+    <link rel="icon" type="image/x-icon" href="/Logo.png" />
+  </head>
+  <body>
+    <main>
+      <div class="dashboard">
+        <section class="hero">
+          <div class="hero__header">
+            <div class="hero__text">
+              <p class="eyebrow">Usuarios</p>
+              <h1>Gestionar usuarios</h1>
+              <p>Crea nuevos usuarios con rol admin o editor y administra el acceso al panel.</p>
+            </div>
+            <div class="actions actions--row">
+              <a class="secondary-button" href="/admin">Volver al panel</a>
+            </div>
+          </div>
+        </section>
+
+        <section class="content-card">
+          {successMsg && (
+            <div class="notification notification--success">{successMsg}</div>
+          )}
+          {errorMsg && (
+            <div class="notification notification--error"><strong>Error:</strong> {errorMsg}</div>
+          )}
+
+          <h2>Crear nuevo usuario</h2>
+          <form method="POST" action="/api/admin/users/create" class="post-form">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" required class="form-input" placeholder="usuario@email.com" />
+              </div>
+
+              <div class="form-group">
+                <label for="display_name">Nombre para mostrar</label>
+                <input id="display_name" name="display_name" type="text" required class="form-input" placeholder="Nombre que aparece en los posts" />
+              </div>
+
+              <div class="form-group">
+                <label for="password">Contraseña</label>
+                <div class="input-eye-wrapper">
+                  <input id="password" name="password" type="password" required class="form-input" minlength="8" placeholder="Mínimo 8 caracteres" />
+                  <button type="button" class="eye-btn" id="toggle-password" aria-label="Mostrar/ocultar contraseña">
+                    <svg id="eye-open" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                    <svg id="eye-closed" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="role">Rol</label>
+                <select id="role" name="role" class="form-select">
+                  <option value="editor">Editor — puede crear publicaciones</option>
+                  <option value="admin">Admin — acceso completo</option>
+                </select>
+              </div>
+            </div>
+            <br />
+            <div class="form-actions">
+              <button type="submit" class="secondary-button">Crear usuario</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="content-card">
+          <h2>Usuarios registrados</h2>
+
+          {usersError && (
+            <div class="notification notification--error">
+              <strong>Error:</strong> {usersError.message}
+            </div>
+          )}
+
+          {!usersError && users && users.length > 0 && (
+            <div class="table-wrapper">
+              <table class="posts-table">
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Creado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u) => (
+                    <tr>
+                      <td>{u.display_name || '—'}</td>
+                      <td>{u.email}</td>
+                      <td>{u.role}</td>
+                      <td>{u.is_active ? 'Activo' : 'Inactivo'}</td>
+                      <td>{new Date(u.created_at).toLocaleDateString('es-ES')}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
+
+    <style>
+      .input-eye-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .input-eye-wrapper .form-input {
+        flex: 1;
+        padding-right: 2.5rem;
+      }
+      .eye-btn {
+        position: absolute;
+        right: 0.6rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        color: var(--color-muted, #888);
+        line-height: 1;
+      }
+      .eye-btn:hover {
+        color: var(--color-text, #fff);
+      }
+    </style>
+
+    <script is:inline>
+      (function () {
+        var btn = document.getElementById('toggle-password');
+        var input = document.getElementById('password');
+        var eyeOpen = document.getElementById('eye-open');
+        var eyeClosed = document.getElementById('eye-closed');
+        if (!btn || !input) return;
+
+        btn.addEventListener('click', function () {
+          var isHidden = input.type === 'password';
+          input.type = isHidden ? 'text' : 'password';
+          eyeOpen.style.display = isHidden ? 'none' : '';
+          eyeClosed.style.display = isHidden ? '' : 'none';
+        });
+      })();
+    </script>
+  </body>
+</html>

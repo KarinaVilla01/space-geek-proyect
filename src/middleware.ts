@@ -42,7 +42,7 @@ export const onRequest: MiddlewareHandler = async (context, next) => {
 
   const isAuthorized =
     !!adminUser &&
-    adminUser.role === 'admin' &&
+    (adminUser.role === 'admin' || adminUser.role === 'editor') &&
     adminUser.is_active === true
 
   // Usuario autorizado intenta entrar al login → mandarlo al panel

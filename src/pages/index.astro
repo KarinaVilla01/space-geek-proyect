@@ -11,7 +11,7 @@ const supabase = createSupabaseClient();
 
 const { data: recentPosts, error } = await supabaseAdmin
   .from("posts")
-  .select("id, title, slug, excerpt, cover_image_path, post_type, published_at")
+  .select("id, title, slug, excerpt, cover_image_path, post_type, published_at, author:admin_users!author_id(display_name, email)")
   .eq("status", "published")
   .order("published_at", { ascending: false })
   .limit(6);
@@ -70,48 +70,7 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
 <PublicLayout title="SpaceGeek | Blog">
   <div class="dashboard home-page">
     <section class="hero__imgs">
-        <div class="img-primary">
-          <img
-            src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img1.png"
-            alt=""
-          />
-        </div>
-        <div class="img-secondary">
-          <div class="imgSection">
-            <div class="img-superior-banner">
-              <img
-                src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img3.png"
-                alt=""
-              />
-            </div>
-            <div class="img-inferior-banner">
-              <img
-                src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img4.png"
-                alt=""
-              />
-            </div>
-          </div>
-          <div class="imgSection imgSection--right">
-            <div class="img-superior-banner bordeSuperiorRedondo">
-              <img
-                src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img2.png"
-                alt=""
-              />
-            </div>
-            <div class="img-inferior-banner">
-              <img
-                src="https://kwqlnrndicwgucwerojk.supabase.co/storage/v1/object/public/Fotos%20prueba/img5.png"
-                alt=""
-              />
-            </div>
-          </div>
-        </div>
-      <!-- <div class="hero__summary">
-        <div class="summary-card">
-          <span>Últimas publicaciones</span>
-          <strong>{recentPosts?.length ?? 0}</strong>
-        </div>
-      </div> -->
+      <img src="/Banner_Top.png" alt="Hero Space" class="hero__space">
     </section>
 
     <section class="home-grid">
@@ -159,7 +118,7 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
                           "es-ES",
                           { year: "numeric", month: "long", day: "numeric" },
                         )}
-                        por OscarSpaceNG 
+                        por {(post.author as any)?.display_name || (post.author as any)?.email?.split('@')[0] || 'SpaceGeek'}
                       </span>
                   </div>
                 </a>
@@ -180,7 +139,7 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
           )}
 
           {/* ── X ── */}
-          {socialByPlatform.x.length > 0 && (
+          <!-- {socialByPlatform.x.length > 0 && (
             <div class="social-section" id="sc-x-section">
               <div class="topRedes">
               <p class="colorWhite">OSCARSPACENG</p>
@@ -225,8 +184,9 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
                   if (items.length < 2) return;
 
                   var cur = 0;
+                  var timer;
 
-                  function scrollTo(idx) {
+                  function goTo(idx) {
                     cur = (idx + items.length) % items.length;
                     snap.scrollTo({ left: snap.offsetWidth * cur, behavior: 'smooth' });
                     dots.forEach(function (d, i) {
@@ -234,21 +194,32 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
                     });
                   }
 
-                  prev && prev.addEventListener('click', function () { scrollTo(cur - 1); });
-                  next && next.addEventListener('click', function () { scrollTo(cur + 1); });
+                  function startAuto() {
+                    timer = setInterval(function () { goTo(cur + 1); }, 5000);
+                  }
+
+                  function resetAuto() {
+                    clearInterval(timer);
+                    startAuto();
+                  }
+
+                  prev && prev.addEventListener('click', function () { goTo(cur - 1); resetAuto(); });
+                  next && next.addEventListener('click', function () { goTo(cur + 1); resetAuto(); });
                   dots.forEach(function (dot) {
-                    dot.addEventListener('click', function () { scrollTo(parseInt(dot.dataset.idx)); });
+                    dot.addEventListener('click', function () { goTo(parseInt(dot.dataset.idx)); resetAuto(); });
                   });
 
-                  // Sincronizar punto activo al hacer scroll manual / swipe
                   snap.addEventListener('scrollend', function () {
                     cur = Math.round(snap.scrollLeft / snap.offsetWidth);
                     dots.forEach(function (d, i) { d.classList.toggle('is-active', i === cur); });
+                    resetAuto();
                   });
+
+                  startAuto();
                 })();
               </script>
             </div>
-          )}
+          )} -->
 
           {/* ── YouTube ── */}
           {socialByPlatform.youtube.length > 0 && (
@@ -333,6 +304,17 @@ const allSocialItems = platformOrder.flatMap(p => socialByPlatform[p]);
               ))}
             </div>
           )}
+          <div class="podcastSection">
+            <a href="https://www.youtube.com/@ELPodCasillo" rel="noopener noreferrer" target="_blank" class="podcast-link">
+              <img src="/ElPodCasillo.png" alt="Podcast Banner">
+            </a>
+
+          </div>
+          <div class="discordSection">
+            <a href="https://discord.gg/WvvCr3TeRu" target="_blank" rel="noopener noreferrer" class="discord-link">
+              <img src="/Discord_Banner.png" alt="Discord Banner">
+            </a>
+          </div>
 
           <script is:inline>
             (function () {

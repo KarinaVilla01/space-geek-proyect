@@ -40,7 +40,7 @@ const { data: adminUser } = await supabase
   .eq('id', user.id)
   .maybeSingle()
 
-if (!adminUser || adminUser.role !== 'admin' || adminUser.is_active !== true) {
+if (!adminUser || !['admin', 'editor'].includes(adminUser.role) || adminUser.is_active !== true) {
   Astro.cookies.delete('sb-access-token', { path: '/' })
   Astro.cookies.delete('sb-refresh-token', { path: '/' })
   return Astro.redirect('/admin/loginOscarUnique?error=Not%20authorized')
